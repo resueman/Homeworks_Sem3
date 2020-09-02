@@ -4,7 +4,7 @@ namespace ParallelAndSynchronousMatrixMultiplication
 {
     class ParallelMatrixMultiplier : IMatrixMultiplier
     {
-        public int[,] MultiplyMatrices(int[,] matrix1, int[,] matrix2)
+        public int[,] Multiply(int[,] matrix1, int[,] matrix2)
         {
             throw new NotImplementedException();
         }

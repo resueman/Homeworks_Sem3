@@ -2,6 +2,6 @@
 {
     public interface IMatrixMultiplier
     {
-        int[,] MultiplyMatrices(int[,] matrix1, int[,] matrix2);
+        int[,] Multiply(int[,] matrix1, int[,] matrix2);
     }
 }

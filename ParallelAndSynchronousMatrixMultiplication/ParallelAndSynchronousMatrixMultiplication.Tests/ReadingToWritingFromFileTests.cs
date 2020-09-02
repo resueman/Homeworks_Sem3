@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ParallelAndSynchronousMatrixMultiplication.Tests
 {
-    public partial class ReadingToWritingFromFileTests
+    public class ReadingToWritingFromFileTests
     {
         private MatrixFileReader fileReader;
         private MatrixFileWriter fileWriter;
@@ -46,32 +46,11 @@ namespace ParallelAndSynchronousMatrixMultiplication.Tests
             Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await fileReader.Read(path));
         }
 
-        private bool AreEqualMatrices(int[,] matrix1, int[,] matrix2)
-        {
-            if (matrix1.GetLength(0) != matrix2.GetLength(0) 
-                || matrix1.GetLength(1) != matrix2.GetLength(1))
-            {
-                return false;
-            }
-
-            for (var i = 0; i < matrix1.GetLength(0); ++i)
-            {
-                for (var j = 0; j < matrix1.GetLength(1); ++j)
-                {
-                    if (matrix1[i, j] != matrix2[i, j])
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
         [TestCaseSource("IsCorrectReadingMatrixFromFileTestCases")]
         public async Task IsCorrectReadingMatrixFromFileTest(int[,] expected, string readingPath)
         {
             var actual = await fileReader.Read(readingPath);
-            Assert.IsTrue(AreEqualMatrices(expected, actual));
+            Assert.IsTrue(ActionsOnMatrices.AreEqual(expected, actual));
         }
 
         [TestCaseSource("IsCorrectWritingMatrixToFileTestCases")]
@@ -94,7 +73,7 @@ namespace ParallelAndSynchronousMatrixMultiplication.Tests
             Assert.AreEqual(expected, actual);
         }
 
-        static object[] IsCorrectWritingMatrixToFileTestCases =
+        private static object[] IsCorrectWritingMatrixToFileTestCases =
         {        
             new object[]
             {
@@ -118,7 +97,7 @@ namespace ParallelAndSynchronousMatrixMultiplication.Tests
             }
         };
 
-        static object[] IsCorrectReadingMatrixFromFileTestCases =
+        private static object[] IsCorrectReadingMatrixFromFileTestCases =
         {
             new object[]
             {

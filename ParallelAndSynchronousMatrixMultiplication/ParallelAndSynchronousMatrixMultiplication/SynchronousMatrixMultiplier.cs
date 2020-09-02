@@ -4,7 +4,7 @@ namespace ParallelAndSynchronousMatrixMultiplication
 {
     public class SynchronousMatrixMultiplier : IMatrixMultiplier
     {
-        public int[,] MultiplyMatrices(int[,] left, int[,] right)
+        public int[,] Multiply(int[,] left, int[,] right)
         {
             if (left.GetLength(1) != right.GetLength(0))
             {
@@ -22,7 +22,7 @@ namespace ParallelAndSynchronousMatrixMultiplication
                 {
                     for (var k = 0; k < commonLength; ++k)
                     {
-                        matrixProduct[i, j] += left[k, i] * right[j, k];
+                        matrixProduct[i, j] += left[i, k] * right[k, j];
                     }
                 }
             }
