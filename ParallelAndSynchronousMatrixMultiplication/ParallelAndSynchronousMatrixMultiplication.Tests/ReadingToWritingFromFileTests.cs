@@ -50,7 +50,7 @@ namespace ParallelAndSynchronousMatrixMultiplication.Tests
         public async Task IsCorrectReadingMatrixFromFileTest(int[,] expected, string readingPath)
         {
             var actual = await fileReader.Read(readingPath);
-            Assert.IsTrue(ActionsOnMatrices.AreEqual(expected, actual));
+            Assert.IsTrue(FunctionsOnMatrices.AreEqual(expected, actual));
         }
 
         [TestCaseSource("IsCorrectWritingMatrixToFileTestCases")]

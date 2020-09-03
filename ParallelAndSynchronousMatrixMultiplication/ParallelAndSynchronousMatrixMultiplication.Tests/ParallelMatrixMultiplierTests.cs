@@ -2,20 +2,21 @@
 
 namespace ParallelAndSynchronousMatrixMultiplication.Tests
 {
-    public class SynchronousMatrixMultiplierTests
+    class ParallelMatrixMultiplierTests
     {
-        private SynchronousMatrixMultiplier syncMultiplier;
+        private ParallelMatrixMultiplier multiplier;
 
         [SetUp]
         public void Setup()
         {
-            syncMultiplier = new SynchronousMatrixMultiplier();
+            multiplier = new ParallelMatrixMultiplier();
         }
 
+        // добавить генератор числа потоков из интервала
         [TestCaseSource("IsCorrectMultiplyingTestCases")]
         public void IsCorrectMultiplyingTest(int[,] left, int[,] right, int[,] expected, int numberOfTestCase)
         {
-            var actualResult = syncMultiplier.Multiply(left, right);
+            var actualResult = multiplier.Multiply(left, right);
 
             Assert.IsTrue(FunctionsOnMatrices.AreEqual(actualResult, expected));
         }
@@ -28,7 +29,7 @@ namespace ParallelAndSynchronousMatrixMultiplication.Tests
             },
             new object[]
             {
-                Matrices.matrix6, Matrices.matrix7, Matrices.matrix8, 2 
+                Matrices.matrix6, Matrices.matrix7, Matrices.matrix8, 2
             },
             new object[]
             {

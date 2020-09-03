@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ParallelAndSynchronousMatrixMultiplication.Tests
+﻿namespace ParallelAndSynchronousMatrixMultiplication.Tests
 {
-    public static class ActionsOnMatrices
+    public static class FunctionsOnMatrices
     {
         public static bool AreEqual(int[,] matrix1, int[,] matrix2)
         {
