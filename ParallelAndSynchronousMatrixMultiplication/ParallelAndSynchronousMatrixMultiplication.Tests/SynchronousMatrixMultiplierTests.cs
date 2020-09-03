@@ -12,7 +12,7 @@ namespace ParallelAndSynchronousMatrixMultiplication.Tests
             syncMultiplier = new SynchronousMatrixMultiplier();
         }
 
-        [TestCaseSource("IsCorrectMultiplyingTestCases")]
+        [TestCaseSource(nameof(IsCorrectMultiplyingTestCases))]
         public void IsCorrectMultiplyingTest(int[,] left, int[,] right, int[,] expected, int numberOfTestCase)
         {
             var actualResult = syncMultiplier.Multiply(left, right);

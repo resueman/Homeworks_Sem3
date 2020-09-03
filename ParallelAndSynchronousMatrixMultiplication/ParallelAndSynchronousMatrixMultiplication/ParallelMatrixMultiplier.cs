@@ -21,12 +21,13 @@ namespace ParallelAndSynchronousMatrixMultiplication
         private List<(int Line, int Column)>[] DistributeTasks(int leftLinesCount, int rightColumnsCount)
         {
             var productCellsCount = leftLinesCount * rightColumnsCount;
-            var size = threadCount > productCellsCount ? productCellsCount : threadCount;
-            var lineColumnPairs = new List<(int Line, int Column)>[size];
-            for (var i = 0; i < size; ++i)
+            var numberOfActiveThreads = threadCount > productCellsCount ? productCellsCount : threadCount;
+            var lineColumnPairs = new List<(int Line, int Column)>[numberOfActiveThreads];
+            for (var i = 0; i < numberOfActiveThreads; ++i)
             {
                 lineColumnPairs[i] = new List<(int Line, int Column)>();
             }
+
             var threadNumber = 0;
             for (var i = 0; i < leftLinesCount; ++i)
             {
@@ -49,9 +50,7 @@ namespace ParallelAndSynchronousMatrixMultiplication
             }
 
             var lineColumnPairs = DistributeTasks(left.GetLength(0), right.GetLength(1));
-            var size = threadCount > lineColumnPairs.Length ? lineColumnPairs.Length : threadCount;
-            var threads = new Thread[size];
-
+            var threads = new Thread[lineColumnPairs.Length];
             var matrixProduct = new int[left.GetLength(0), right.GetLength(1)];
             for (var i = 0; i < threads.Length; ++i)
             {
