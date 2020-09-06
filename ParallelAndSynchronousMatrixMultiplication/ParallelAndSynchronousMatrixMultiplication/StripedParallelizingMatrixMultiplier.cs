@@ -4,16 +4,20 @@ using System.Threading;
 
 namespace ParallelAndSynchronousMatrixMultiplication
 {
-    public class ParallelMatrixMultiplier : IMatrixMultiplier
-    {        
+    public class StripedParallelizingMatrixMultiplier : IMatrixMultiplier
+    {
         private readonly int threadCount;
 
-        public ParallelMatrixMultiplier()
+        public StripedParallelizingMatrixMultiplier()
         {
-            threadCount = Environment.ProcessorCount + 1;
+            if (threadCount < 0)
+            {
+                throw new ArgumentOutOfRangeException("Number of threads shouls be positive");
+            }
+            threadCount = Environment.ProcessorCount;
         }
 
-        public ParallelMatrixMultiplier(int threadCount)
+        public StripedParallelizingMatrixMultiplier(int threadCount)
         {
             this.threadCount = threadCount;
         }
