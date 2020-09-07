@@ -1,0 +1,11 @@
+matrix:
+  - solution_name: ParallelAndSynchronousMatrixMultiplication/ParallelAndSynchronousMatrixMultiplication.sln
+    
+before_build:
+  - nuget restore %solution_name%
+
+build_script:
+  - msbuild %solution_name%
+
+test_script:
+  - vstest.console /logger:Appveyor %solution_name%
