@@ -21,7 +21,7 @@ namespace ParallelAndSynchronousMatrixMultiplication.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(TestCasesInputData), "IsCorrectMultiplyingTestCases")]
+        [TestCaseSource(typeof(MatrixMultipliersTestCases), "IsCorrectMultiplyingTestCases")]
         public void IsCorrectMultiplyingTest(int[,] left, int[,] right, int[,] expected, int numberOfTestCase)
         {
             var threads = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100 };
@@ -48,7 +48,7 @@ namespace ParallelAndSynchronousMatrixMultiplication.Tests
         }
 
         [Test]
-        [TestCaseSource(typeof(TestCasesInputData), "ImpossibleMultiplicationTestCases")]
+        [TestCaseSource(typeof(MatrixMultipliersTestCases), "ImpossibleMultiplicationTestCases")]
         public void ImpossibleMultiplicationTest(int[,] left, int[,] right, int numberOfTestCase)
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => multiplier.Multiply(left, right));

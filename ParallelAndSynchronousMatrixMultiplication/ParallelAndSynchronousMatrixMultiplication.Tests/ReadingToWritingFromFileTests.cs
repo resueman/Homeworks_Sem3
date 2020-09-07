@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace ParallelAndSynchronousMatrixMultiplication.Tests
 {
+    /// <summary>
+    /// Tests the work of MatrixFileWriter and MatrixFileReader classes
+    /// </summary>
     public class ReadingToWritingFromFileTests
     {
         private MatrixFileReader fileReader;

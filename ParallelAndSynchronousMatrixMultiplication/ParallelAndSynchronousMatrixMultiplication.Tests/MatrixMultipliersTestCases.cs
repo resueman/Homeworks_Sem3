@@ -1,6 +1,6 @@
 ﻿namespace ParallelAndSynchronousMatrixMultiplication.Tests
 {
-    public class TestCasesInputData
+    public class MatrixMultipliersTestCases
     {
         private static readonly object[] IsCorrectMultiplyingTestCases =
         {

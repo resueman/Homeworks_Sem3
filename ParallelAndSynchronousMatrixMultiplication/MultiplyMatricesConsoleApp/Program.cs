@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using ParallelAndSynchronousMatrixMultiplication;
 
@@ -85,14 +86,14 @@ namespace MultiplyMatricesConsoleApp
                 foreach(var (Name, Multiplier) in multipliers)
                 {
                     var timestamp = ElapseWorkTime(Multiplier, left, right);
-                    Console.WriteLine($"{Name} - {FormatTimeSpan(timestamp)}");
+                    Console.WriteLine($"{Name} - {timestamp.TotalMilliseconds}");
                 }
                 Console.WriteLine();
             }
         }
 
         private static string FormatTimeSpan(TimeSpan timeSpan)
-            => string.Format("{0:00}:{1:000000}", timeSpan.Seconds, timeSpan.Milliseconds);
+            => string.Format("{0:00}:{1:000000000}", timeSpan.Seconds, timeSpan.Milliseconds);
 
         private static TimeSpan ElapseWorkTime(IMatrixMultiplier multiplier, int[,] left, int[,] right)
         {
@@ -126,16 +127,28 @@ namespace MultiplyMatricesConsoleApp
                     break;
             }
 
+            Console.WriteLine("Enter path to file with left matrix");
             var pathLeft = Console.ReadLine();
+            Console.WriteLine("Enter path to file with right matrix");
             var pathRight = Console.ReadLine();
+            Console.WriteLine("Enter path to file, where result will be written");
             var resultPath = Console.ReadLine();
 
-            var fileReader = new MatrixFileReader();
-            var left = await fileReader.ReadAsync(pathLeft);
-            var right = await fileReader.ReadAsync(pathRight);
+            int[,] left, right;
+            try
+            {
+                var fileReader = new MatrixFileReader();
+                left = await fileReader.ReadAsync(pathLeft);
+                right = await fileReader.ReadAsync(pathRight);
+            }
+            catch (FileNotFoundException e)
+            {
+                Console.WriteLine(e.Message);
+                return;
+            }
             
             IMatrixMultiplier multiplier;
-            Console.WriteLine("Chose type of multiplier");
+            Console.WriteLine("\nChoose type of multiplier");
             Console.WriteLine("1 - Synchronous Matrix Multiplier");
             Console.WriteLine("2 - Parallel.For Matrix Multiplier");
             Console.WriteLine("3 - Striped Parallelizing Matrix Multiplier");
@@ -161,10 +174,18 @@ namespace MultiplyMatricesConsoleApp
             }
 
             Console.WriteLine("Multiplying performs...");
-            var result = multiplier.Multiply(left, right);
+            try 
+            {
+                var result = multiplier.Multiply(left, right);
+                var fileWriter = new MatrixFileWriter();
+                await fileWriter.WriteAsync(result, resultPath);
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                Console.WriteLine(e.Message);
+                return;
+            }            
 
-            var fileWriter = new MatrixFileWriter();
-            await fileWriter.WriteAsync(result, resultPath);
             Console.WriteLine("Ready!");
         }
     }
