@@ -1,5 +1,6 @@
-matrix:
-  - solution_name: ParallelAndSynchronousMatrixMultiplication/ParallelAndSynchronousMatrixMultiplication.sln
+environment:
+    matrix:
+      - solution_name: ParallelAndSynchronousMatrixMultiplication/ParallelAndSynchronousMatrixMultiplication.sln
     
 before_build:
   - nuget restore %solution_name%
