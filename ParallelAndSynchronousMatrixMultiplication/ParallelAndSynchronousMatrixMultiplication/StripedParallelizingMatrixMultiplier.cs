@@ -4,24 +4,40 @@ using System.Threading;
 
 namespace ParallelAndSynchronousMatrixMultiplication
 {
+    /// <summary>
+    /// Performs parallel matrix multiplication using striped parallelizing algorithm
+    /// </summary>
     public class StripedParallelizingMatrixMultiplier : IMatrixMultiplier
     {
         private readonly int threadCount;
 
+        /// <summary>
+        /// Creates instance of multiplier
+        /// </summary>
         public StripedParallelizingMatrixMultiplier()
+        {
+            threadCount = Environment.ProcessorCount;
+        }
+
+        /// <summary>
+        /// Creates instance of multiplier with specified number of using threads
+        /// </summary>
+        /// <param name="threadCount">Number of threads</param>
+        public StripedParallelizingMatrixMultiplier(int threadCount)
         {
             if (threadCount < 0)
             {
                 throw new ArgumentOutOfRangeException("Number of threads shouls be positive");
             }
-            threadCount = Environment.ProcessorCount;
-        }
-
-        public StripedParallelizingMatrixMultiplier(int threadCount)
-        {
             this.threadCount = threadCount;
         }
 
+        /// <summary>
+        /// Evenly distributes line-column multiplying pairs between threads
+        /// </summary>
+        /// <param name="leftLinesCount">Lines of left matrix factor</param>
+        /// <param name="rightColumnsCount">Columns of right matrix factor</param>
+        /// <returns>Array of line-column pairs for each thread</returns>
         private List<(int Line, int Column)>[] DistributeTasks(int leftLinesCount, int rightColumnsCount)
         {
             var productCellsCount = leftLinesCount * rightColumnsCount;
@@ -45,6 +61,12 @@ namespace ParallelAndSynchronousMatrixMultiplication
             return lineColumnPairs;
         }
 
+        /// <summary>
+        /// Multiplies matrices using striped parallelizing algorithm
+        /// </summary>
+        /// <param name="left">Left matrix factor</param>
+        /// <param name="right">Right matrix factor</param>
+        /// <returns>Result of multiplication</returns>
         public int[,] Multiply(int[,] left, int[,] right)
         {
             if (left.GetLength(1) != right.GetLength(0))

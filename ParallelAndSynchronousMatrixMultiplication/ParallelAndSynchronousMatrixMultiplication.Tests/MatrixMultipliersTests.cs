@@ -3,6 +3,10 @@ using System;
 
 namespace ParallelAndSynchronousMatrixMultiplication.Tests
 {
+    /// <summary>
+    /// Tests for matrix multipliers
+    /// </summary>
+    /// <typeparam name="T">Type of matrix multiplier</typeparam>
     [TestFixture(typeof(SynchronousMatrixMultiplier))]
     [TestFixture(typeof(ParallelForMatrixMultiplier))]
     [TestFixture(typeof(StripedParallelizingMatrixMultiplier))]

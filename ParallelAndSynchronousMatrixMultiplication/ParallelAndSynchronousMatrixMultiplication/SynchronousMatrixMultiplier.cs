@@ -2,8 +2,17 @@
 
 namespace ParallelAndSynchronousMatrixMultiplication
 {
+    /// <summary>
+    /// Performs matrices multiplication using one thread
+    /// </summary>
     public class SynchronousMatrixMultiplier : IMatrixMultiplier
     {
+        /// <summary>
+        /// Performs synchronus multiplication of two matrices
+        /// </summary>
+        /// <param name="left">Left matrix factor</param>
+        /// <param name="right">Right matrix factor</param>
+        /// <returns>Result of multiplication</returns>
         public int[,] Multiply(int[,] left, int[,] right)
         {
             if (left.GetLength(1) != right.GetLength(0))

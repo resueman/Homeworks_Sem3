@@ -22,19 +22,19 @@ namespace ParallelAndSynchronousMatrixMultiplication.Tests
         [TestCase("i'm not exist.txt")]
         public void ReadingFromNotExistingFileTest(string path)
         {
-            Assert.ThrowsAsync<FileNotFoundException>(async () => await fileReader.Read(path));
+            Assert.ThrowsAsync<FileNotFoundException>(async () => await fileReader.ReadAsync(path));
         }
 
         [TestCase(@"./matrices/matrix_reading/incorrect/empty.txt")]
         public void ReadingMatrixFromEmptyFile(string path)
         {
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await fileReader.Read(path));
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await fileReader.ReadAsync(path));
         }
 
         [TestCase(@"./matrices/matrix_reading/incorrect/jagged_array.txt")]
         public void ReadingJaggedArrayTest(string path)
         {
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await fileReader.Read(path));
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await fileReader.ReadAsync(path));
         }
 
         [TestCase(@"./matrices/matrix_reading/incorrect/incorrect1.txt")]
@@ -43,13 +43,13 @@ namespace ParallelAndSynchronousMatrixMultiplication.Tests
         [TestCase(@"./matrices/matrix_reading/incorrect/incorrect4.txt")]
         public void ReadingMatrixWithIncorrectSymbols(string path)
         {
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await fileReader.Read(path));
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await fileReader.ReadAsync(path));
         }
 
         [TestCaseSource("IsCorrectReadingMatrixFromFileTestCases")]
         public async Task IsCorrectReadingMatrixFromFileTest(int[,] expected, string readingPath)
         {
-            var actual = await fileReader.Read(readingPath);
+            var actual = await fileReader.ReadAsync(readingPath);
             Assert.IsTrue(FunctionsOnMatrices.AreEqual(expected, actual));
         }
 
@@ -57,7 +57,7 @@ namespace ParallelAndSynchronousMatrixMultiplication.Tests
         public async Task IsCorrectWritingMatrixToFileTest(int[,] writtenMatrix, string expectedFilePath)
         {
             var writingPath = "writing_test.txt";
-            await fileWriter.Write(writtenMatrix, writingPath);
+            await fileWriter.WriteAsync(writtenMatrix, writingPath);
 
             string actual, expected;
             using (var streamReader = new StreamReader(writingPath, Encoding.Default))

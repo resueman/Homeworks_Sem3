@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParallelAndSynchronousMatrixMultiplication", "ParallelAndSynchronousMatrixMultiplication\ParallelAndSynchronousMatrixMultiplication.csproj", "{E90EE86A-BD69-4EAE-8C7A-BDA2880FD454}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParallelAndSynchronousMatrixMultiplication.Tests", "ParallelAndSynchronousMatrixMultiplication.Tests\ParallelAndSynchronousMatrixMultiplication.Tests.csproj", "{78A20FE3-2787-49D5-817E-B9B12217530D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParallelAndSynchronousMatrixMultiplication.Tests", "ParallelAndSynchronousMatrixMultiplication.Tests\ParallelAndSynchronousMatrixMultiplication.Tests.csproj", "{78A20FE3-2787-49D5-817E-B9B12217530D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiplyMatricesConsoleApp", "MultiplyMatricesConsoleApp\MultiplyMatricesConsoleApp.csproj", "{94B982C8-B4E7-463E-9AA4-435E9BB6E53E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{78A20FE3-2787-49D5-817E-B9B12217530D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78A20FE3-2787-49D5-817E-B9B12217530D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78A20FE3-2787-49D5-817E-B9B12217530D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94B982C8-B4E7-463E-9AA4-435E9BB6E53E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94B982C8-B4E7-463E-9AA4-435E9BB6E53E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94B982C8-B4E7-463E-9AA4-435E9BB6E53E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94B982C8-B4E7-463E-9AA4-435E9BB6E53E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

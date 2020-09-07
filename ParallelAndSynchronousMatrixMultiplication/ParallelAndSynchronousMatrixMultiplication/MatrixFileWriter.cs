@@ -4,9 +4,18 @@ using System.Threading.Tasks;
 
 namespace ParallelAndSynchronousMatrixMultiplication
 {
+    /// <summary>
+    /// Writes matrix to file
+    /// </summary>
     public class MatrixFileWriter
     {
-        public async Task Write(int[,] matrix, string path)
+        /// <summary>
+        /// Asynchronously writes matrix to file
+        /// </summary>
+        /// <param name="matrix">Matrix of integers</param>
+        /// <param name="path">Path to file where matrix will be written</param>
+        /// <returns></returns>
+        public async Task WriteAsync(int[,] matrix, string path)
         {
             using var streamWriter = new StreamWriter(path, false, Encoding.Default);
             for (var i = 0; i < matrix.GetLength(0); ++i)

@@ -3,8 +3,17 @@ using System.Threading.Tasks;
 
 namespace ParallelAndSynchronousMatrixMultiplication
 {
+    /// <summary>
+    /// Perform parallel matrix multiplication using system Parallel.For() method
+    /// </summary>
     public class ParallelForMatrixMultiplier : IMatrixMultiplier
     {
+        /// <summary>
+        /// Perform parallel matrix multiplication
+        /// </summary>
+        /// <param name="left">Left matrix factor</param>
+        /// <param name="right">Right matrix factor</param>
+        /// <returns></returns>
         public int[,] Multiply(int[,] left, int[,] right)
         {
             if (left.GetLength(1) != right.GetLength(0))

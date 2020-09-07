@@ -7,8 +7,16 @@ using System.Threading.Tasks;
 
 namespace ParallelAndSynchronousMatrixMultiplication
 {
+    /// <summary>
+    /// Reads matrix from file
+    /// </summary>
     public class MatrixFileReader
     {
+        /// <summary>
+        /// Parses strings of numbers and creates matrix
+        /// </summary>
+        /// <param name="lines">Strings with numbers devided by spaces</param>
+        /// <returns>Matrix of integers</returns>
         private int[,] ParseMatrix(List<string[]> lines)
         {
             var columns = lines[0].Length;
@@ -34,7 +42,12 @@ namespace ParallelAndSynchronousMatrixMultiplication
             return matrix;
         }
 
-        public async Task<int[,]> Read(string path)
+        /// <summary>
+        /// Asynchronously reads matrix from text file
+        /// </summary>
+        /// <param name="path">Path to file with matrix</param>
+        /// <returns>Matrix of integers</returns>
+        public async Task<int[,]> ReadAsync(string path)
         {
             if (!File.Exists(path))
             {
@@ -51,7 +64,7 @@ namespace ParallelAndSynchronousMatrixMultiplication
                 {
                     continue;
                 }
-                lines.Add(line.Split(' '));
+                lines.Add(line.Split(' ')); 
             }
 
             if (lines.Count == 0)

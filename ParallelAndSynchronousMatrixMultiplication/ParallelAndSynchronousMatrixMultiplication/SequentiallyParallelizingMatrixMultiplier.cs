@@ -3,15 +3,25 @@ using System.Threading;
 
 namespace ParallelAndSynchronousMatrixMultiplication
 {
+    /// <summary>
+    /// Performs parallel matrix multiplication using sequential parallelizing algorithm
+    /// </summary>
     public class SequentiallyParallelizingMatrixMultiplier : IMatrixMultiplier
     {
         private readonly int threadCount;
 
+        /// <summary>
+        /// Creates instance of multiplier
+        /// </summary>
         public SequentiallyParallelizingMatrixMultiplier()
         {
             threadCount = Environment.ProcessorCount;
         }
 
+        /// <summary>
+        /// Creates instance of multiplier with specified number of using threads
+        /// </summary>
+        /// <param name="threadCount">Number of threads</param>
         public SequentiallyParallelizingMatrixMultiplier(int threadCount)
         {
             if (threadCount < 0)
@@ -21,6 +31,12 @@ namespace ParallelAndSynchronousMatrixMultiplication
             this.threadCount = threadCount;
         }
 
+        /// <summary>
+        /// Multiplies matrices using sequential parallelizing algorithm
+        /// </summary>
+        /// <param name="left">Left matrix factor</param>
+        /// <param name="right">Right matrix factor</param>
+        /// <returns>Result of multiplication</returns>
         public int[,] Multiply(int[,] left, int[,] right)
         {
             if (left.GetLength(1) != right.GetLength(0))
