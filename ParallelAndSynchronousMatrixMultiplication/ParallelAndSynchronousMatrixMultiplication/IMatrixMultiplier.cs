@@ -5,6 +5,12 @@
     /// </summary>
     public interface IMatrixMultiplier 
     {
-        int[,] Multiply(int[,] matrix1, int[,] matrix2);
+        /// <summary>
+        /// Multiplies two matrices
+        /// </summary>
+        /// <param name="left">Left matrix factor</param>
+        /// <param name="right">Right matrix factor</param>
+        /// <returns>New matrix - result of matrix multiplication</returns>
+        int[,] Multiply(int[,] left, int[,] right);
     }
 }

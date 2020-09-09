@@ -1,5 +1,8 @@
 ﻿namespace ParallelAndSynchronousMatrixMultiplication.Tests
 {
+    /// <summary>
+    /// Provides test cases for matrix multipliers tests
+    /// </summary>
     public class MatrixMultipliersTestCases
     {
         private static readonly object[] IsCorrectMultiplyingTestCases =

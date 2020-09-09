@@ -1,5 +1,8 @@
 ﻿namespace ParallelAndSynchronousMatrixMultiplication.Tests
 {
+    /// <summary>
+    /// Provides matrices for test cases
+    /// </summary>
     public static class Matrices
     {
         public static int[,] matrix1 = new int[5, 7]

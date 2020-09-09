@@ -69,6 +69,10 @@ namespace ParallelAndSynchronousMatrixMultiplication
         /// <returns>Result of multiplication</returns>
         public int[,] Multiply(int[,] left, int[,] right)
         {
+            if (left == null || right == null)
+            {
+                throw new ArgumentNullException("Reference on matrix was null");
+            }
             if (left.GetLength(1) != right.GetLength(0))
             {
                 throw new ArgumentOutOfRangeException("Number of columns of the left matrix isn't equal " +

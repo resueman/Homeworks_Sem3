@@ -55,13 +55,13 @@ namespace MultiplyMatricesConsoleApp
                 ("StripedParallelizingMatrixMultiplier", strippedMultiplierTimestamps)
             };
 
-            foreach(var (Name, Timespans) in multipliersWorkTime)
+            foreach (var (name, timespans) in multipliersWorkTime)
             {
-                Console.WriteLine(Name);
+                Console.WriteLine(name);
                 Console.WriteLine("Threads - Time");
-                foreach(var (ThreadsCount, Timestamp) in Timespans)
+                foreach(var (threadsCount, timestamp) in timespans)
                 {
-                    Console.WriteLine($"{ThreadsCount} - {FormatTimeSpan(Timestamp)}");
+                    Console.WriteLine($"{threadsCount} - {FormatTimeSpan(timestamp)}");
                 }
                 Console.WriteLine();
             }
@@ -83,10 +83,10 @@ namespace MultiplyMatricesConsoleApp
                 Console.WriteLine($"Size: {i} * {i}");
                 var left = generator.Generate(i, i);
                 var right = generator.Generate(i, i);
-                foreach(var (Name, Multiplier) in multipliers)
+                foreach (var (name, multiplier) in multipliers)
                 {
-                    var timestamp = ElapseWorkTime(Multiplier, left, right);
-                    Console.WriteLine($"{Name} - {timestamp.TotalMilliseconds}");
+                    var timestamp = ElapseWorkTime(multiplier, left, right);
+                    Console.WriteLine($"{name} - {timestamp.TotalMilliseconds}");
                 }
                 Console.WriteLine();
             }
@@ -146,31 +146,27 @@ namespace MultiplyMatricesConsoleApp
                 Console.WriteLine(e.Message);
                 return;
             }
-            
-            IMatrixMultiplier multiplier;
+
             Console.WriteLine("\nChoose type of multiplier");
             Console.WriteLine("1 - Synchronous Matrix Multiplier");
             Console.WriteLine("2 - Parallel.For Matrix Multiplier");
             Console.WriteLine("3 - Striped Parallelizing Matrix Multiplier");
             Console.WriteLine("4 - Sequentially Parallelizing Matrix Multiplier");
             Console.WriteLine("Press any key to exit");
+
             choice = Console.ReadLine();
-            switch (choice)
+            IMatrixMultiplier multiplier = choice switch
             {
-                case "1":
-                    multiplier = new SynchronousMatrixMultiplier();
-                    break;
-                case "2":
-                    multiplier = new ParallelForMatrixMultiplier();
-                    break;
-                case "3":
-                    multiplier = new StripedParallelizingMatrixMultiplier();
-                    break;
-                case "4":
-                    multiplier = new SequentiallyParallelizingMatrixMultiplier();
-                    break;
-                default:
-                    return;
+                "1" => new SynchronousMatrixMultiplier(),
+                "2" => new ParallelForMatrixMultiplier(),
+                "3" => new StripedParallelizingMatrixMultiplier(),
+                "4" => new SequentiallyParallelizingMatrixMultiplier(),
+                _ => null
+            };
+
+            if (multiplier == null)
+            {
+                return;
             }
 
             Console.WriteLine("Multiplying performs...");
