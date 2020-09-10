@@ -2,6 +2,9 @@
 
 namespace Lazy.Tests
 {
+    /// <summary>
+    /// Class, which instances plays role of object with deffered creation in test classes
+    /// </summary>
     public class GiantMatrix
     {
         public int[,] Elements { get; set; }

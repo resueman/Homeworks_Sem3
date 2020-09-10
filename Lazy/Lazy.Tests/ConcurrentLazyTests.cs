@@ -1,8 +1,12 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Threading;
 
 namespace Lazy.Tests
 {
+    /// <summary>
+    /// Tests if instance of ConcurrentLazy works correctly in multithreading program 
+    /// </summary>
     class ConcurrentLazyTests
     {
         private ILazy<GiantMatrix> lazyGiantMatrix;
@@ -12,7 +16,9 @@ namespace Lazy.Tests
         [SetUp]
         public void Setup()
         {
-            lazyGiantMatrix = LazyFactory<GiantMatrix>.CreateConcurrentLazy(() => new GiantMatrix(1000, 1000));
+            lazyGiantMatrix = LazyFactory<GiantMatrix>
+                .CreateConcurrentLazy(() => new GiantMatrix(1000, 1000));
+
             resetEvent = new ManualResetEvent(false);
         }
 
@@ -69,6 +75,19 @@ namespace Lazy.Tests
             countdownEvent.Wait();
 
             AreAllElementsTheSameObject(matrices);
+        }
+
+        [Test]
+        public void PassingNullSupplierToConcurrentLazyTest()
+        {
+            Assert.Throws<ArgumentNullException>(() => LazyFactory<GiantMatrix>.CreateConcurrentLazy(null));
+        }
+
+        [Test]
+        public void PassingSupplierThatReturnsNullToConcurrentLazyTest()
+        {
+            var lazyReturningNull = LazyFactory<GiantMatrix>.CreateConcurrentLazy(() => null);
+            Assert.IsNull(lazyReturningNull.Get());
         }
     }
 }

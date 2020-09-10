@@ -1,10 +1,11 @@
 using NUnit.Framework;
-using Lazy;
 using System;
-using System.Threading;
 
 namespace Lazy.Tests
 {
+    /// <summary>
+    /// Tests if instance of Lazy works correctly in synchronous program
+    /// </summary>
     public class LazyTests
     {
         private ILazy<GiantMatrix> lazyGiantMatrix;
