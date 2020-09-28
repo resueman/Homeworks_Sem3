@@ -3,7 +3,7 @@
 namespace Lazy
 {
     /// <summary>
-    /// Creates lazy thread-unsafe object
+    /// Creates thread-unsafe lazy object
     /// </summary>
     /// <typeparam name="T">The type of value that is being lazily initialized</typeparam>
     class Lazy<T> : ILazy<T>
@@ -13,7 +13,7 @@ namespace Lazy
         private bool isCreated;
 
         /// <summary>
-        /// Creates instance of Lazy class
+        /// Creates instance of thread-unsafe Lazy class
         /// </summary>
         /// <param name="supplier">Deferred calculation</param>
         public Lazy(Func<T> supplier) 
@@ -23,10 +23,10 @@ namespace Lazy
 
         /// <summary>
         /// Returns a lazily initialized value without a guarantee of 
-        /// correct work in multithreading program
+        /// correct work in a multithreading program
         /// </summary>
         /// <returns>The first call causes the calculation and returns the result. 
-        /// Repeated calls return the same object as the first call</returns>
+        /// Next calls return the same object as the first call</returns>
         public T Get()
         {
             if (!isCreated)

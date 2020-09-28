@@ -3,10 +3,10 @@
 namespace Lazy
 {
     /// <summary>
-    /// Allows to create thread-safe and thread-unsafe Lazy object, 
+    /// Creates thread-safe or thread-unsafe Lazy object, 
     /// which allows to postpone creation or calculation of value
     /// </summary>
-    /// <typeparam name="T">The type of value that will be lazily initialized</typeparam>
+    /// <typeparam name="T">The type of value that is being lazily initialized</typeparam>
     public class LazyFactory<T>
     {
         /// <summary>

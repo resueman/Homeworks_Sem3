@@ -5,7 +5,7 @@ using System.Threading;
 namespace Lazy.Tests
 {
     /// <summary>
-    /// Tests if instance of ConcurrentLazy works correctly in multithreading program 
+    /// Tests if instance of thread-safe ConcurrentLazy works correctly in multithreading program 
     /// </summary>
     class ConcurrentLazyTests
     {
@@ -22,26 +22,7 @@ namespace Lazy.Tests
             resetEvent = new ManualResetEvent(false);
         }
 
-        [Test]
-        public void DoesConcurrentLazyReturnTheSameObjectAsAfterEvaluationWhenExecutedSynchronouslyTest()
-        {
-            var justEvaluatedMatrix = lazyGiantMatrix.Get();
-            var alreadyEvaluatedMatrix = lazyGiantMatrix.Get();
-            Assert.AreSame(justEvaluatedMatrix, alreadyEvaluatedMatrix);
-        }
-
-        [Test]
-        public void DoesConcurrentLazyReturnTheSameObjectManyTimesWhenExecutedSynchronouslyTest()
-        {
-            for (var i = 0; i < 10000; ++i)
-            {
-                var matrixObject1 = lazyGiantMatrix.Get();
-                var matrixObject2 = lazyGiantMatrix.Get();
-                Assert.AreSame(matrixObject1, matrixObject2);
-            }
-        }
-
-        private void AreAllElementsTheSameObject(GiantMatrix[] matrices)
+        private void AreAllTheSameObject(GiantMatrix[] matrices)
         {
             for (int i = 1; i < matrices.Length; ++i)
             {
@@ -73,21 +54,9 @@ namespace Lazy.Tests
             }
             resetEvent.Set();
             countdownEvent.Wait();
+            countdownEvent.Dispose();
 
-            AreAllElementsTheSameObject(matrices);
-        }
-
-        [Test]
-        public void PassingNullSupplierToConcurrentLazyTest()
-        {
-            Assert.Throws<ArgumentNullException>(() => LazyFactory<GiantMatrix>.CreateConcurrentLazy(null));
-        }
-
-        [Test]
-        public void PassingSupplierThatReturnsNullToConcurrentLazyTest()
-        {
-            var lazyReturningNull = LazyFactory<GiantMatrix>.CreateConcurrentLazy(() => null);
-            Assert.IsNull(lazyReturningNull.Get());
+            AreAllTheSameObject(matrices);
         }
     }
 }
