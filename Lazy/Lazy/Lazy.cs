@@ -6,7 +6,7 @@ namespace Lazy
     /// Creates thread-unsafe lazy object
     /// </summary>
     /// <typeparam name="T">The type of value that is being lazily initialized</typeparam>
-    class Lazy<T> : ILazy<T>
+    public class Lazy<T> : ILazy<T>
     {
         private Func<T> supplier;
         private T lazyObject;
