@@ -22,6 +22,13 @@ namespace Lazy.Tests
             resetEvent = new ManualResetEvent(false);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            countdownEvent.Dispose();
+            resetEvent.Close();
+        }
+
         private void AreAllTheSameObject(GiantMatrix[] matrices)
         {
             for (int i = 1; i < matrices.Length; ++i)
@@ -33,7 +40,7 @@ namespace Lazy.Tests
         [Test]
         public void DoesConcurrentLazyReturnTheSameObjectInMultithreadedScenarioTest()
         {
-            var threadCount = 100;
+            var threadCount = 20;
             var threads = new Thread[threadCount];
             var matrices = new GiantMatrix[threadCount];
             countdownEvent = new CountdownEvent(threadCount);
@@ -54,7 +61,6 @@ namespace Lazy.Tests
             }
             resetEvent.Set();
             countdownEvent.Wait();
-            countdownEvent.Dispose();
 
             AreAllTheSameObject(matrices);
         }
