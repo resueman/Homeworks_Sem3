@@ -10,7 +10,6 @@ namespace Lazy
     {
         private Func<T> supplier;
         private T lazyObject;
-        private bool isCreated;
 
         /// <summary>
         /// Creates instance of thread-unsafe Lazy class
@@ -18,7 +17,7 @@ namespace Lazy
         /// <param name="supplier">Deferred calculation</param>
         public Lazy(Func<T> supplier) 
         {
-            this.supplier = supplier;
+            this.supplier = supplier ?? throw new ArgumentNullException("Supplier can't be null");
         }
 
         /// <summary>
@@ -29,10 +28,9 @@ namespace Lazy
         /// Next calls return the same object as the first call</returns>
         public T Get()
         {
-            if (!isCreated)
+            if (supplier != null)
             {
                 lazyObject = supplier();
-                isCreated = true;
                 supplier = null;
             }
             return lazyObject;

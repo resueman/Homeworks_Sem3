@@ -8,7 +8,7 @@ namespace Lazy.Tests
     /// work correctly in base scenarios of single-thread program 
     /// </summary>
     /// <typeparam name="TLazy">Type of Lazy - thread-unsafe or thread-safe</typeparam>
-    [TestFixture(typeof(Lazy<GiantMatrix>))]
+    [TestFixture(typeof(Lazy.Lazy<GiantMatrix>))]
     [TestFixture(typeof(ConcurrentLazy<GiantMatrix>))]
     class BaseLazyFunctionalityTests<TLazy>
     {

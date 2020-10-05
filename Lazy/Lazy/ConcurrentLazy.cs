@@ -9,9 +9,8 @@ namespace Lazy
     public class ConcurrentLazy<T> : ILazy<T>
     {
         private T evaluated;
-        private Func<T> supplier;
+        private volatile Func<T> supplier;
         private readonly object locker;
-        private volatile bool isCreated;
 
         /// <summary>
         /// Creates instance of thread-safe ConcurrentLazy class
@@ -19,9 +18,8 @@ namespace Lazy
         /// <param name="supplier">Deferred calculation</param>
         public ConcurrentLazy(Func<T> supplier)
         {
-            this.supplier = supplier;
+            this.supplier = supplier ?? throw new ArgumentNullException("Supplier can't be null");
             locker = new object();
-            isCreated = false;
         }
 
         /// <summary>
@@ -32,18 +30,17 @@ namespace Lazy
         /// Next calls return the same object as the first call</returns>
         public T Get()
         {
-            if (isCreated)
+            if (supplier == null)
             {
                 return evaluated;
             }
 
             lock (locker)
             {
-                if (!isCreated)
+                if (supplier != null)
                 {
                     evaluated = supplier();
                     supplier = null;
-                    isCreated = true;
                 }
             }
 
