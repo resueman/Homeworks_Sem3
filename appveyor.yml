@@ -9,7 +9,7 @@ before_build:
   - nuget restore %solution_name%
 
 build_script:
-  - msbuild %solution_name%
+  - dotnet build %solution_name%
 
 test_script:
-  - vstest.console /logger:Appveyor %solution_name%
+  - dotnet test %solution_name%
