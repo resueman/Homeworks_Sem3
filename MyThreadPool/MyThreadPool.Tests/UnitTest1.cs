@@ -39,6 +39,9 @@ namespace MyThreadPool.Tests
             {
                 Console.WriteLine(e.Message);
             }
+
+            myThreadPool.Shutdown();
+            Assert.Throws<ThreadPoolWasShuttedDownException>(() => myThreadPool.Shutdown());
         }
     }
 }

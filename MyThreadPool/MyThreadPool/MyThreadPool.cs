@@ -6,19 +6,31 @@ namespace MyThreadPool
 {
     public class MyThreadPool
     {
-        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-        private ManualResetEvent resetEvent = new ManualResetEvent(true);
-        private readonly BlockingCollection<Action> tasks = new BlockingCollection<Action>();
-        private object locker = new object(); 
+        private int activeThreads;
+        private object locker;
+        private AutoResetEvent resetEvent;
+        private CancellationTokenSource cancellationTokenSource;
+        private readonly BlockingCollection<Action> tasks;
 
         public MyThreadPool(int threadCount)
         {
             if (threadCount < 1)
             {
-                throw new ArgumentOutOfRangeException("Number of thread should be a positive number");
+                throw new ArgumentOutOfRangeException(nameof(threadCount), "Number of threads should be a positive number");
             }
 
-            var threads = new Thread[threadCount];
+            activeThreads = threadCount;
+            locker = new object();
+            tasks = new BlockingCollection<Action>();
+            resetEvent = new AutoResetEvent(false);
+            cancellationTokenSource = new CancellationTokenSource();
+            
+            StartThreads();
+        }
+
+        private void StartThreads()
+        {
+            var threads = new Thread[activeThreads];
             for (var i = 0; i < threads.Length; ++i)
             {
                 threads[i] = new Thread(() => DequeueTask())
@@ -39,6 +51,11 @@ namespace MyThreadPool
                     {
                         if (cancellationTokenSource.IsCancellationRequested)
                         {
+                            --activeThreads;
+                            if (activeThreads == 0)
+                            {
+                                resetEvent.Set();
+                            }
                             return;
                         }
                         Monitor.Wait(locker);
@@ -53,7 +70,7 @@ namespace MyThreadPool
         {
             if (cancellationTokenSource.IsCancellationRequested)
             {
-                throw new Exception("Impossible to add task, because ThreadPool was shouted down");
+                throw new ThreadPoolWasShuttedDownException("Impossible to add task");
             }
 
             var task = new MyTask<TResult>(func, this);
@@ -64,7 +81,14 @@ namespace MyThreadPool
 
         public void Shutdown()
         {
+            if (cancellationTokenSource.IsCancellationRequested)
+            {
+                throw new ThreadPoolWasShuttedDownException("Impossible to shut down more than once");
+            }
+
             cancellationTokenSource.Cancel();
+            Monitor.PulseAll(locker);            
+            resetEvent.WaitOne();
         }
     }
 }
