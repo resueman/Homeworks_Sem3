@@ -15,7 +15,7 @@ namespace MyThreadPool.Tests
         {
             var myThreadPool = new MyThreadPool(10);
             var task = myThreadPool.QueueWorkItem(() => 20 + 8).ContinueWith(x => x.ToString()).ContinueWith(x => x + "yars");
-            var task2 = myThreadPool.QueueWorkItem(() => { myThreadPool.Shutdown(); return 5; });
+            var task2 = myThreadPool.QueueWorkItem(() => 5);
             var task3 = myThreadPool.QueueWorkItem(() => "hhh" + "hhh");
             
             var task4 = task2.ContinueWith(x => x * 100);

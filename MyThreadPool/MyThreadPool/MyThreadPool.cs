@@ -4,13 +4,82 @@ using System.Threading;
 
 namespace MyThreadPool
 {
-    public class MyThreadPool
+    public class MyThreadPool : IDisposable
     {
+        class MyTask<TResult> : IMyTask<TResult>
+        {
+            private TResult result;
+            private Func<TResult> supplier;
+            private readonly MyThreadPool threadPool;
+            private AggregateException aggregateException;
+            private ManualResetEvent resetEvent;
+            private ConcurrentQueue<Action> continuations;
+
+            public MyTask(Func<TResult> supplier, MyThreadPool threadPool)
+            {
+                this.supplier = supplier;
+                resetEvent = new ManualResetEvent(false);
+                this.threadPool = threadPool;
+                continuations = new ConcurrentQueue<Action>();
+                IsCompleted = false;
+            }
+
+            public bool IsCompleted { get; set; } 
+
+            public TResult Result
+            {
+                get
+                {
+                    resetEvent.WaitOne();
+                    if (aggregateException != null)
+                    {
+                        throw aggregateException;
+                    }
+                    return result;
+                }
+                set
+                {
+                    result = value;
+                }
+            }
+
+            public IMyTask<TNewResult> ContinueWith<TNewResult>(Func<TResult, TNewResult> continuation)
+            {
+                var task = new MyTask<TNewResult>(() => continuation(Result), threadPool);
+                continuations.Enqueue(() => task.Run());
+                return task;
+            }
+
+            public void Run()
+            {
+                try
+                {
+                    Result = supplier.Invoke();
+                    IsCompleted = true;
+                }
+                catch (Exception e)
+                {
+                    aggregateException = new AggregateException(e);
+                }
+                finally
+                {
+                    resetEvent.Set();
+                    supplier = null;
+                    while (continuations.Count != 0)
+                    {
+                        continuations.TryDequeue(out Action action);
+                        threadPool.tasks.Add(action, threadPool.cancellationTokenSource.Token);
+                        Monitor.Pulse(threadPool.locker);
+                    }
+                }
+            }
+        }
+
         private int activeThreads;
-        private object locker;
-        private AutoResetEvent resetEvent;
-        private CancellationTokenSource cancellationTokenSource;
+        private readonly object locker;
+        private readonly AutoResetEvent resetEvent;
         private readonly BlockingCollection<Action> tasks;
+        private readonly CancellationTokenSource cancellationTokenSource;
 
         public MyThreadPool(int threadCount)
         {
@@ -21,8 +90,8 @@ namespace MyThreadPool
 
             activeThreads = threadCount;
             locker = new object();
-            tasks = new BlockingCollection<Action>();
             resetEvent = new AutoResetEvent(false);
+            tasks = new BlockingCollection<Action>();
             cancellationTokenSource = new CancellationTokenSource();
             
             StartThreads();
@@ -68,14 +137,20 @@ namespace MyThreadPool
 
         public IMyTask<TResult> QueueWorkItem<TResult>(Func<TResult> func)
         {
-            if (cancellationTokenSource.IsCancellationRequested)
+            var task = new MyTask<TResult>(func, this);
+            try
             {
-                throw new ThreadPoolWasShuttedDownException("Impossible to add task");
+                tasks.Add(() => task.Run(), cancellationTokenSource.Token);
+                Monitor.Pulse(locker);
+            }
+            catch (Exception e) 
+            when ( e is OperationCanceledException 
+                || e is ObjectDisposedException 
+                || e is InvalidOperationException)
+            {
+                throw new ThreadPoolWasShuttedDownException("Impossible to perform task, thread pool was shutted down");
             }
 
-            var task = new MyTask<TResult>(func, this);
-            tasks.Add(() => task.Run());
-            Monitor.Pulse(locker);
             return task;
         }
 
@@ -83,12 +158,22 @@ namespace MyThreadPool
         {
             if (cancellationTokenSource.IsCancellationRequested)
             {
-                throw new ThreadPoolWasShuttedDownException("Impossible to shut down more than once");
+                throw new ThreadPoolWasShuttedDownException("Impossible to shut thread pool down more than once");
             }
 
+            tasks.CompleteAdding();
             cancellationTokenSource.Cancel();
-            Monitor.PulseAll(locker);            
+            Monitor.PulseAll(locker);
+            
             resetEvent.WaitOne();
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            resetEvent.Dispose();
+            cancellationTokenSource.Dispose();
+            tasks.Dispose();
         }
     }
 }
