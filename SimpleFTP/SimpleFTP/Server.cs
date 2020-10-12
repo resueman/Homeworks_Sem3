@@ -1,5 +1,6 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
@@ -29,7 +30,7 @@ namespace SimpleFTP
                         using var stream = new NetworkStream(socket);
                         using var streamReader = new StreamReader(stream);
                         var request = await streamReader.ReadToEndAsync();
-                        var response = ProcessRequest(request);
+                        var response = await ProcessRequest(request);
                         await SendResponseAsync(response, stream);
                         socket.Close();
                     });
@@ -41,7 +42,7 @@ namespace SimpleFTP
             }
         }
 
-        private string ProcessRequest(string request)
+        private async Task<string> ProcessRequest(string request)
         {
             var regex = new Regex(@"([12]){1}?s+(.+)");
             var match = regex.Match(request);
@@ -65,7 +66,7 @@ namespace SimpleFTP
                     }
                     break;
                 case 2:
-                    var (contentSize, content) = Get(path);
+                    var (contentSize, content) = await Get(path);
                     response = $"{contentSize} " + $"{content}";
                     break;
             }
@@ -80,14 +81,33 @@ namespace SimpleFTP
             await streamWriter.FlushAsync();
         }
 
-        public (int size, (string name, bool isDirectory)[] list) List(string path)
+        public (int size, IEnumerable<(string name, bool isDirectory)> list) List(string path)
         {
-            return default;
+            if (!Directory.Exists(path))
+            {
+                return (-1, null);
+            }
+
+            var directories = Directory.GetDirectories(path);
+            var files = Directory.GetFiles(path);            
+            var size = directories.Length + files.Length;
+            var directoryContent = new List<(string, bool)>();
+            directoryContent.AddRange(files.Select(file => (file, false)));
+            directoryContent.AddRange(directories.Select(directory => (directory, true)));
+
+            return (size , directoryContent);
         }
 
-        public (long size, byte[] content) Get(string path)
+        public async Task<(long size, byte[] content)> Get(string path)
         {
-            return default;
+            if (!File.Exists(path))
+            {
+                return (-1, null);
+            }
+
+            var content = await File.ReadAllBytesAsync(path);
+
+            return (content.Length, content);
         }
     }
 }
