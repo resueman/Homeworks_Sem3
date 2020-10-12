@@ -1,32 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Net.Sockets;
 using System.Text;
-using System.Text.RegularExpressions;
+using System.Net.Sockets;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace SimpleFTP
 {
-    public class Client
+    public class Client : IDisposable
     {
         private readonly TcpClient client;
         private readonly NetworkStream stream;
+        private readonly StreamReader reader;
+        private readonly StreamWriter writer;
 
         public Client(int port = 8888)
         {
             client = new TcpClient("127.0.0.1", port);
             stream = client.GetStream();
+            reader = new StreamReader(stream);
+            writer = new StreamWriter(stream) { AutoFlush = true };
         }
 
-        internal async Task<(int sizeOfDirectory, IEnumerable<(string name, bool isDirectory)> directoryContent)> List(string pathToDirectory)
+        public async Task<(int size, IEnumerable<(string name, bool isDirectory)> directoryContent)> List(string pathToDirectory)
         {
-            await SendRequest($"1 {pathToDirectory}");
-            var response = await ReceiveResponse();
-            if (response == "-1")
-            {
-                return (-1, null);
-            }
+            await writer.WriteLineAsync($"1 {pathToDirectory}");
+
+            var response = await reader.ReadLineAsync();
             var splitted = response.Replace("  ", " ").Trim().Split(' ');
             var size = int.Parse(splitted[0]);
             var directoryContent = new List<(string name, bool isDirectory)>();
@@ -35,13 +36,14 @@ namespace SimpleFTP
                 directoryContent.Add((splitted[i - 1], bool.Parse(splitted[i])));
             }
 
-            return (size, directoryContent);
+            return (size, directoryContent.Count > 0 ? directoryContent : null);
         }
 
-        internal async Task<(long size, byte[] content)> Get(string pathToFile)
+        public async Task<(long size, byte[] content)> Get(string pathToFile)
         {
-            await SendRequest($"2 {pathToFile}");
-            var response = await ReceiveResponse();
+            await writer.WriteLineAsync($"2 {pathToFile}");
+
+            var response = await reader.ReadLineAsync();
             var regex = new Regex(@"(\d+)\s*(.+)?");
             var match = regex.Match(response);
             var size = long.Parse(match.Groups[1].Value[0].ToString());
@@ -50,17 +52,13 @@ namespace SimpleFTP
             return (size, content);
         }
 
-        private async Task SendRequest(string request)
+        public void Dispose()
         {
-            var writer = new StreamWriter(stream);
-            await writer.WriteLineAsync(request);
-            await writer.FlushAsync();
-        }
-
-        private async Task<string> ReceiveResponse()
-        {
-            var reader = new StreamReader(stream);
-            return await reader.ReadLineAsync();
+            Console.WriteLine("Disposed");
+            client.Close();
+            stream.Dispose();
+            reader.Dispose();
+            writer.Dispose();
         }
     }
 }

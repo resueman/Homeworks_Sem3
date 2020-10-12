@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace SimpleFTP
@@ -17,7 +16,7 @@ namespace SimpleFTP
         static async Task Main()
         {
             PrintOptions();
-            var client = new Client();
+            using var client = new Client();
             while (true)
             {
                 Console.WriteLine("\nPlease, choose option");
@@ -25,17 +24,17 @@ namespace SimpleFTP
                 switch (option)
                 {
                     case "1":
-                        Console.WriteLine("Enter path to directory");
+                        Console.Write("Path to directory: ");
                         var pathToDirectory = Console.ReadLine();
                         var (sizeOfDirectory, directoryContent) = await client.List(pathToDirectory);
-                        Console.WriteLine($"size: {sizeOfDirectory}");
+                        Console.WriteLine($"Number of files and directories in current directory: {sizeOfDirectory}");
                         foreach (var (name, isDirectory) in directoryContent)
                         {
                             Console.WriteLine($"Name: {name}, is directory: {isDirectory}");
                         }
                         break;
                     case "2":
-                        Console.WriteLine("Enter path to file");
+                        Console.WriteLine("Path to file: ");
                         var pathToFile = Console.ReadLine();
                         var (sizeOfFile, fileContent) = await client.Get(pathToFile);
                         Console.WriteLine($"size: {sizeOfFile}");

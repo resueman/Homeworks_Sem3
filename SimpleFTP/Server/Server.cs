@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
+using System.Linq;
 using System.Net.Sockets;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace SimpleFTP
 {
-    public class Server
+    public class Server : IDisposable
     {
         private readonly TcpListener listener;
 
@@ -20,33 +20,22 @@ namespace SimpleFTP
 
         public async Task Start()
         {
-            try
+            listener.Start();
+            while (true)
             {
-                listener.Start();
-                while (true)
+                using var client = await listener.AcceptTcpClientAsync();
+                await Task.Run(async () =>
                 {
-                    var client = await listener.AcceptTcpClientAsync();
-                    await Task.Run(async () =>
+                    using var stream = client.GetStream();
+                    using var streamReader = new StreamReader(stream);
+                    using var streamWriter = new StreamWriter(stream) { AutoFlush = true };
+                    while (true)
                     {
-                        while (true)
-                        {
-                            var stream = client.GetStream();
-                            var streamReader = new StreamReader(stream);
-                            var request = await streamReader.ReadLineAsync();
-                            var response = await ProcessRequest(request);
-                            await SendResponseAsync(response, stream);
-                        }                        
-                    });
-                    client.Close();
-                }                        
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-            finally
-            { 
-                listener.Stop();
+                        var request = await streamReader.ReadLineAsync();
+                        var response = await ProcessRequest(request);
+                        await streamWriter.WriteLineAsync(response);
+                    }
+                });
             }
         }
 
@@ -82,13 +71,6 @@ namespace SimpleFTP
             return response;
         }
 
-        private async Task SendResponseAsync(string response, NetworkStream stream)
-        {
-            var streamWriter = new StreamWriter(stream);
-            await streamWriter.WriteLineAsync(response);
-            await streamWriter.FlushAsync();
-        }
-
         private (int size, IEnumerable<(string name, bool isDirectory)> list) List(string path)
         {
             if (!Directory.Exists(path))
@@ -96,9 +78,9 @@ namespace SimpleFTP
                 return (-1, null);
             }
 
+            var files = Directory.GetFiles(path);
             var directories = Directory.GetDirectories(path);
-            var files = Directory.GetFiles(path);            
-            var size = directories.Length + files.Length;
+            var size = files.Length + directories.Length;
             var directoryContent = new List<(string, bool)>();
             directoryContent.AddRange(files.Select(file => (file, false)));
             directoryContent.AddRange(directories.Select(directory => (directory, true)));
@@ -116,6 +98,11 @@ namespace SimpleFTP
             var content = await File.ReadAllBytesAsync(path);
 
             return (content.Length, content);
+        }
+
+        public void Dispose()
+        {
+            listener.Stop();
         }
     }
 }
