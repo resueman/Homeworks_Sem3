@@ -7,8 +7,6 @@ namespace SimpleFTP.Tests
         [SetUp]
         public void Setup()
         {
-            var server = new Server();
-            var client = new Client();
         }
 
         [Test]

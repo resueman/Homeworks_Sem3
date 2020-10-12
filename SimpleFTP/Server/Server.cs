@@ -81,7 +81,7 @@ namespace SimpleFTP
             await streamWriter.FlushAsync();
         }
 
-        public (int size, IEnumerable<(string name, bool isDirectory)> list) List(string path)
+        private (int size, IEnumerable<(string name, bool isDirectory)> list) List(string path)
         {
             if (!Directory.Exists(path))
             {
@@ -98,7 +98,7 @@ namespace SimpleFTP
             return (size , directoryContent);
         }
 
-        public async Task<(long size, byte[] content)> Get(string path)
+        private async Task<(long size, byte[] content)> Get(string path)
         {
             if (!File.Exists(path))
             {
