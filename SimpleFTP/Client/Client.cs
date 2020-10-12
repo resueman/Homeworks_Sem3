@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace SimpleFTP
 {
@@ -15,12 +16,32 @@ namespace SimpleFTP
         private readonly StreamReader reader;
         private readonly StreamWriter writer;
 
-        public Client(int port = 8888)
+        public Client()
         {
-            client = new TcpClient("127.0.0.1", port);
+            client = new TcpClient();
             stream = client.GetStream();
             reader = new StreamReader(stream);
             writer = new StreamWriter(stream) { AutoFlush = true };
+        }
+
+        public async Task<bool> ConnectToSever(string hostname = "127.0.0.1", int port = 8888)
+        {
+            var timeout = 10;
+            var maxTimeout = 1000000;
+            while (timeout < maxTimeout)
+            {
+                try
+                {
+                    await client.ConnectAsync(hostname, port);
+                    return true;
+                }
+                catch (SocketException)
+                {
+                    Thread.Sleep(timeout);
+                    timeout *= 2;
+                }
+            }
+            return false;
         }
 
         public async Task<(int size, IEnumerable<(string name, bool isDirectory)> directoryContent)> List(string pathToDirectory)

@@ -17,6 +17,13 @@ namespace SimpleFTP
         {
             PrintOptions();
             using var client = new Client();
+            Console.WriteLine("Trying to connect to server...");
+            var success = await client.ConnectToSever();
+            if (!success)
+            {
+                Console.WriteLine("Connecting to server failed");
+                return;
+            }
             while (true)
             {
                 Console.WriteLine("\nPlease, choose option");
