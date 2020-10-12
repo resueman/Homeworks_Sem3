@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -22,37 +23,44 @@ namespace SimpleFTP
             try
             {
                 listener.Start();
-                var socket = await listener.AcceptSocketAsync();
                 while (true)
                 {
+                    var client = await listener.AcceptTcpClientAsync();
                     await Task.Run(async () =>
                     {
-                        using var stream = new NetworkStream(socket);
-                        using var streamReader = new StreamReader(stream);
-                        var request = await streamReader.ReadToEndAsync();
-                        var response = await ProcessRequest(request);
-                        await SendResponseAsync(response, stream);
-                        socket.Close();
+                        while (true)
+                        {
+                            var stream = client.GetStream();
+                            var streamReader = new StreamReader(stream);
+                            var request = await streamReader.ReadLineAsync();
+                            var response = await ProcessRequest(request);
+                            await SendResponseAsync(response, stream);
+                        }                        
                     });
-                }
+                    client.Close();
+                }                        
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
             finally
-            {
+            { 
                 listener.Stop();
             }
         }
 
         private async Task<string> ProcessRequest(string request)
         {
-            var regex = new Regex(@"([12]){1}?s+(.+)");
+            var regex = new Regex(@"([12]){1}?\s+(.+)");
             var match = regex.Match(request);
             if (!match.Success)
             {
                 return "Incorrect request, try again";
             }
 
-            var (command, path) = (int.Parse(match.Groups[1].Value[0].ToString()),
-                match.Groups[1].Value[1].ToString());
+            var (command, path) = (int.Parse(match.Groups[1].Value),
+                match.Groups[2].Value);
 
             var response = "";
             switch (command)
@@ -76,7 +84,7 @@ namespace SimpleFTP
 
         private async Task SendResponseAsync(string response, NetworkStream stream)
         {
-            using var streamWriter = new StreamWriter(stream);
+            var streamWriter = new StreamWriter(stream);
             await streamWriter.WriteLineAsync(response);
             await streamWriter.FlushAsync();
         }

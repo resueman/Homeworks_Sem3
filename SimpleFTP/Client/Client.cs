@@ -10,11 +10,13 @@ namespace SimpleFTP
 {
     public class Client
     {
-        private readonly int port;
+        private readonly TcpClient client;
+        private readonly NetworkStream stream;
 
         public Client(int port = 8888)
         {
-            this.port = port;
+            client = new TcpClient("127.0.0.1", port);
+            stream = client.GetStream();
         }
 
         internal async Task<(int sizeOfDirectory, IEnumerable<(string name, bool isDirectory)> directoryContent)> List(string pathToDirectory)
@@ -30,7 +32,7 @@ namespace SimpleFTP
             var directoryContent = new List<(string name, bool isDirectory)>();
             for (var i = 2; i < splitted.Length; ++i)
             {
-                directoryContent.Add((splitted[i - 1], bool.Parse(splitted[i]));
+                directoryContent.Add((splitted[i - 1], bool.Parse(splitted[i])));
             }
 
             return (size, directoryContent);
@@ -50,18 +52,15 @@ namespace SimpleFTP
 
         private async Task SendRequest(string request)
         {
-            using var client = new TcpClient("localhost", port);
-            var stream = client.GetStream();
             var writer = new StreamWriter(stream);
-            await writer.WriteLineAsync();
+            await writer.WriteLineAsync(request);
+            await writer.FlushAsync();
         }
 
         private async Task<string> ReceiveResponse()
         {
-            using var client = new TcpClient("localhost", port);
-            var stream = client.GetStream();
             var reader = new StreamReader(stream);
-            return await reader.ReadToEndAsync();
+            return await reader.ReadLineAsync();
         }
     }
 }

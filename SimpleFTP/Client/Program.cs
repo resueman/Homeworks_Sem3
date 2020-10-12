@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace SimpleFTP
@@ -38,7 +39,7 @@ namespace SimpleFTP
                         var pathToFile = Console.ReadLine();
                         var (sizeOfFile, fileContent) = await client.Get(pathToFile);
                         Console.WriteLine($"size: {sizeOfFile}");
-                        Console.Write("File successfully downloaded");
+                        Console.WriteLine("File successfully downloaded");
                         break;
                     case "3":
                         return;
