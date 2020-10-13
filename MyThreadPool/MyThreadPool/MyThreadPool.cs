@@ -71,7 +71,7 @@ namespace MyThreadPool
                 var task = new MyTask<TNewResult>(() => continuation(Result), threadPool);
                 if (IsCompleted)
                 {
-                    threadPool.EnqueueWrappedTask(() => task.Run());
+                    threadPool.AddTask(() => task.Run());
                 }
                 else
                 {
@@ -102,18 +102,25 @@ namespace MyThreadPool
                     while (continuations.Count != 0)
                     {
                         continuations.TryDequeue(out Action action);
-                        threadPool.EnqueueWrappedTask(action); 
-                        Monitor.Pulse(threadPool.locker);
+                        threadPool.AddTask(action);
+                        lock (threadPool.locker)
+                        {
+                            Monitor.Pulse(threadPool.locker);
+                        }
                     }
                 }
             }
         }
 
-        private int activeThreads;
         private readonly object locker;
         private readonly BlockingCollection<Action> tasks;
         private readonly AutoResetEvent areAllThreadsTerminatedResetEvent;
         private readonly CancellationTokenSource cancellationTokenSource;
+
+        /// <summary>
+        /// Number of running threads
+        /// </summary>
+        public int ActiveThreads { get; private set; }
 
         /// <summary>
         /// Creates instance of MyThreadPool class
@@ -126,7 +133,7 @@ namespace MyThreadPool
                 throw new ArgumentOutOfRangeException(nameof(threadCount), "Number of threads should be a positive number");
             }
 
-            activeThreads = threadCount;
+            ActiveThreads = threadCount;
             locker = new object();
             tasks = new BlockingCollection<Action>();
             areAllThreadsTerminatedResetEvent = new AutoResetEvent(false);
@@ -137,11 +144,12 @@ namespace MyThreadPool
 
         private void StartThreads()
         {
-            var threads = new Thread[activeThreads];
+            var threads = new Thread[ActiveThreads];
             for (var i = 0; i < threads.Length; ++i)
             {
                 threads[i] = new Thread(() => DequeueTask())
                 {
+                    Name = "Thread Pool Thread",
                     IsBackground = true
                 };
                 threads[i].Start();
@@ -158,8 +166,8 @@ namespace MyThreadPool
                     {
                         if (cancellationTokenSource.IsCancellationRequested)
                         {
-                            --activeThreads;
-                            if (activeThreads == 0)
+                            --ActiveThreads;
+                            if (ActiveThreads == 0)
                             {
                                 areAllThreadsTerminatedResetEvent.Set();
                             }
@@ -182,12 +190,12 @@ namespace MyThreadPool
         public IMyTask<TResult> QueueWorkItem<TResult>(Func<TResult> func) 
         {
             var task = new MyTask<TResult>(func, this);
-            EnqueueWrappedTask(() => task.Run());
+            AddTask(() => task.Run());
 
             return task;
         }
 
-        private void EnqueueWrappedTask(Action action)
+        private void AddTask(Action action)
         {
             try
             {
