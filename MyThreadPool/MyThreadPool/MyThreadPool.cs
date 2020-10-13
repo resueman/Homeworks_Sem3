@@ -19,8 +19,8 @@ namespace MyThreadPool
             private Func<TResult> supplier;
             private readonly MyThreadPool threadPool;
             private AggregateException aggregateException;
-            private ManualResetEvent isCompletedResetEvent;
-            private ConcurrentQueue<Action> continuations;
+            private readonly ManualResetEvent isCompletedResetEvent;
+            private readonly ConcurrentQueue<Action> continuations;
 
             /// <summary>
             /// Creates instance of asynchronus operation
@@ -30,10 +30,9 @@ namespace MyThreadPool
             public MyTask(Func<TResult> supplier, MyThreadPool threadPool)
             {
                 this.supplier = supplier;
-                isCompletedResetEvent = new ManualResetEvent(false);
                 this.threadPool = threadPool;
+                isCompletedResetEvent = new ManualResetEvent(false);
                 continuations = new ConcurrentQueue<Action>();
-                IsCompleted = false;
             }
 
             /// <summary>
