@@ -4,52 +4,87 @@ using System.Threading;
 
 namespace MyThreadPool
 {
+    /// <summary>
+    /// Provides pool with fixed number of threads that can be used to execute tasks
+    /// </summary>
     public class MyThreadPool : IDisposable
     {
+        /// <summary>
+        /// Represents an asynchronous operation
+        /// </summary>
+        /// <typeparam name="TResult">Type of asynchronous operation result</typeparam>
         class MyTask<TResult> : IMyTask<TResult>
         {
             private TResult result;
             private Func<TResult> supplier;
             private readonly MyThreadPool threadPool;
             private AggregateException aggregateException;
-            private ManualResetEvent resetEvent;
+            private ManualResetEvent isCompletedResetEvent;
             private ConcurrentQueue<Action> continuations;
 
+            /// <summary>
+            /// Creates instance of asynchronus operation
+            /// </summary>
+            /// <param name="supplier">Function which represents a task</param>
+            /// <param name="threadPool">Thread pool which will perform task</param>
             public MyTask(Func<TResult> supplier, MyThreadPool threadPool)
             {
                 this.supplier = supplier;
-                resetEvent = new ManualResetEvent(false);
+                isCompletedResetEvent = new ManualResetEvent(false);
                 this.threadPool = threadPool;
                 continuations = new ConcurrentQueue<Action>();
                 IsCompleted = false;
             }
 
-            public bool IsCompleted { get; set; } 
+            /// <summary>
+            /// Determines whether the task is completed
+            /// </summary>
+            public bool IsCompleted { get; private set; } 
 
+            /// <summary>
+            /// Returns result of task evaluation
+            /// </summary>
             public TResult Result
             {
                 get
                 {
-                    resetEvent.WaitOne();
+                    isCompletedResetEvent.WaitOne();
                     if (aggregateException != null)
                     {
                         throw aggregateException;
                     }
                     return result;
                 }
-                set
+                private set
                 {
                     result = value;
                 }
             }
 
+            /// <summary>
+            /// Creates new task based on result of previous task
+            /// </summary>
+            /// <typeparam name="TNewResult">Type of new task result</typeparam>
+            /// <param name="continuation">Function which will be applied to the result of a given task</param>
+            /// <returns>New task for execution</returns>
             public IMyTask<TNewResult> ContinueWith<TNewResult>(Func<TResult, TNewResult> continuation)
             {
                 var task = new MyTask<TNewResult>(() => continuation(Result), threadPool);
-                continuations.Enqueue(() => task.Run());
+                if (IsCompleted)
+                {
+                    threadPool.EnqueueWrappedTask(() => task.Run());
+                }
+                else
+                {
+                    continuations.Enqueue(() => task.Run());
+                }
+
                 return task;
             }
 
+            /// <summary>
+            /// Evaluates task
+            /// </summary>
             public void Run()
             {
                 try
@@ -63,12 +98,12 @@ namespace MyThreadPool
                 }
                 finally
                 {
-                    resetEvent.Set();
+                    isCompletedResetEvent.Set();
                     supplier = null;
                     while (continuations.Count != 0)
                     {
                         continuations.TryDequeue(out Action action);
-                        threadPool.tasks.Add(action, threadPool.cancellationTokenSource.Token);
+                        threadPool.EnqueueWrappedTask(action); 
                         Monitor.Pulse(threadPool.locker);
                     }
                 }
@@ -77,10 +112,14 @@ namespace MyThreadPool
 
         private int activeThreads;
         private readonly object locker;
-        private readonly AutoResetEvent resetEvent;
         private readonly BlockingCollection<Action> tasks;
+        private readonly AutoResetEvent areAllThreadsTerminatedResetEvent;
         private readonly CancellationTokenSource cancellationTokenSource;
 
+        /// <summary>
+        /// Creates instance of MyThreadPool class
+        /// </summary>
+        /// <param name="threadCount">Number of threads in pool</param>
         public MyThreadPool(int threadCount)
         {
             if (threadCount < 1)
@@ -90,8 +129,8 @@ namespace MyThreadPool
 
             activeThreads = threadCount;
             locker = new object();
-            resetEvent = new AutoResetEvent(false);
             tasks = new BlockingCollection<Action>();
+            areAllThreadsTerminatedResetEvent = new AutoResetEvent(false);
             cancellationTokenSource = new CancellationTokenSource();
             
             StartThreads();
@@ -123,7 +162,7 @@ namespace MyThreadPool
                             --activeThreads;
                             if (activeThreads == 0)
                             {
-                                resetEvent.Set();
+                                areAllThreadsTerminatedResetEvent.Set();
                             }
                             return;
                         }
@@ -135,25 +174,42 @@ namespace MyThreadPool
             }
         }
 
-        public IMyTask<TResult> QueueWorkItem<TResult>(Func<TResult> func)
+        /// <summary>
+        /// Queues a method for execution. Method will be executed on first available thread
+        /// </summary>
+        /// <typeparam name="TResult">Method return type</typeparam>
+        /// <param name="func">Method for asynchronous execution</param>
+        /// <returns>Task that will be executed on first available thread</returns>
+        public IMyTask<TResult> QueueWorkItem<TResult>(Func<TResult> func) 
         {
             var task = new MyTask<TResult>(func, this);
-            try
-            {
-                tasks.Add(() => task.Run(), cancellationTokenSource.Token);
-                Monitor.Pulse(locker);
-            }
-            catch (Exception e) 
-            when ( e is OperationCanceledException 
-                || e is ObjectDisposedException 
-                || e is InvalidOperationException)
-            {
-                throw new ThreadPoolWasShuttedDownException("Impossible to perform task, thread pool was shutted down");
-            }
+            EnqueueWrappedTask(() => task.Run());
 
             return task;
         }
 
+        private void EnqueueWrappedTask(Action action)
+        {
+            try
+            {
+                lock (locker)
+                {
+                    tasks.Add(action, cancellationTokenSource.Token);
+                    Monitor.Pulse(locker);
+                }
+            }
+            catch (Exception e)
+            when (e is OperationCanceledException
+                || e is ObjectDisposedException
+                || e is InvalidOperationException)
+            {
+                throw new ThreadPoolWasShuttedDownException("Impossible to add task, thread pool was shutted down");
+            }
+        }
+
+        /// <summary>
+        /// Terminates threads, but before lets all tasks that have already entered the queue be counted
+        /// </summary>
         public void Shutdown()
         {
             if (cancellationTokenSource.IsCancellationRequested)
@@ -163,15 +219,21 @@ namespace MyThreadPool
 
             tasks.CompleteAdding();
             cancellationTokenSource.Cancel();
-            Monitor.PulseAll(locker);
+            lock (locker)
+            {
+                Monitor.PulseAll(locker);
+            }
             
-            resetEvent.WaitOne();
+            areAllThreadsTerminatedResetEvent.WaitOne();
             Dispose();
         }
 
+        /// <summary>
+        /// Releases resourses
+        /// </summary>
         public void Dispose()
         {
-            resetEvent.Dispose();
+            areAllThreadsTerminatedResetEvent.Dispose();
             cancellationTokenSource.Dispose();
             tasks.Dispose();
         }

@@ -2,12 +2,28 @@
 
 namespace MyThreadPool
 {
+    /// <summary>
+    /// Interface for asynchronous operations that will be evaluated by the thread pool 
+    /// </summary>
+    /// <typeparam name="TResult">Type of asynchronous operation result</typeparam>
     public interface IMyTask<TResult>
     {
-        bool IsCompleted { get; set; }
+        /// <summary>
+        /// Determines whether the task is completed
+        /// </summary>
+        bool IsCompleted { get; }
 
-        TResult Result { get; set; }
+        /// <summary>
+        /// Returns result of task evaluation
+        /// </summary>
+        TResult Result { get; }
 
+        /// <summary>
+        /// Creates new task based on result of previous task
+        /// </summary>
+        /// <typeparam name="TNewResult">Type of new task result</typeparam>
+        /// <param name="continuation">Function which will be applied to the result of a given task</param>
+        /// <returns>New task for execution</returns>
         IMyTask<TNewResult> ContinueWith<TNewResult>(Func<TResult, TNewResult> continuation);
     }
 }
