@@ -1,6 +1,5 @@
 using NUnit.Framework;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -11,16 +10,16 @@ namespace MyThreadPool.Tests
         private MyThreadPool threadPool;
         private int threadCount;
 
-        [SetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             threadCount = Environment.ProcessorCount + 1;
-            threadPool = new MyThreadPool(threadCount);
         }
 
-        [Test]
-        public void Test1()
+        [TearDown]
+        public void TearDown()
         {
+            threadPool.Shutdown();
         }
 
         [Test]
@@ -37,6 +36,7 @@ namespace MyThreadPool.Tests
         [Test]
         public void ShutThreadPoolDownMoreThanOnceTest()
         {
+            threadPool = new MyThreadPool(threadCount);
             threadPool.Shutdown();
             for (var i = 0; i < 100; ++i)
             {
@@ -120,12 +120,6 @@ namespace MyThreadPool.Tests
             threadPool = new MyThreadPool(threadCount);
             threadPool.Shutdown();
             Assert.AreEqual(0, threadPool.ActiveThreads);
-        }
-
-        [Test]
-        public void Test()
-        {
-
         }
     }
 }
