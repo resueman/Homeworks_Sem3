@@ -29,7 +29,7 @@ namespace MyThreadPool
             /// <param name="threadPool">Thread pool which will perform task</param>
             public MyTask(Func<TResult> supplier, MyThreadPool threadPool)
             {
-                this.supplier = supplier;
+                this.supplier = supplier ?? throw new ArgumentNullException(nameof(supplier));
                 this.threadPool = threadPool;
                 isCompletedResetEvent = new ManualResetEvent(false);
                 continuations = new ConcurrentQueue<Action>();
@@ -67,7 +67,12 @@ namespace MyThreadPool
             /// <param name="continuation">Function which will be applied to the result of a given task</param>
             /// <returns>New task for execution</returns>
             public IMyTask<TNewResult> ContinueWith<TNewResult>(Func<TResult, TNewResult> continuation)
-            {
+            { 
+                if (continuation == null)
+                {
+                    throw new ArgumentNullException(nameof(continuation));
+                }
+
                 var task = new MyTask<TNewResult>(() => continuation(Result), threadPool);
                 if (IsCompleted)
                 {
@@ -199,9 +204,9 @@ namespace MyThreadPool
         {
             try
             {
+                tasks.Add(action, cancellationTokenSource.Token);
                 lock (locker)
                 {
-                    tasks.Add(action, cancellationTokenSource.Token);
                     Monitor.Pulse(locker);
                 }
             }
