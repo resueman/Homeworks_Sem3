@@ -176,8 +176,8 @@ namespace MyThreadPool
                         Monitor.Wait(locker);
                     }
                 }
-                var task = tasks.Take();
-                task.Invoke();
+                tasks.TryTake(out Action task);
+                task?.Invoke();
             }
         }
 

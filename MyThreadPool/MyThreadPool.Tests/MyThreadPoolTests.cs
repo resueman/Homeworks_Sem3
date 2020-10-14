@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -7,41 +8,35 @@ namespace MyThreadPool.Tests
 {
     public class Tests
     {
-        private MyThreadPool threadPool;
         private int threadCount;
+        private HashSet<int> threadIds;
+        private ManualResetEvent manualResetEvent;
+        private List<IMyTask<int>> tasks;
 
-        [OneTimeSetUp]
+        [SetUp]
         public void Setup()
         {
             threadCount = Environment.ProcessorCount + 1;
+            threadIds = new HashSet<int>();
+            manualResetEvent = new ManualResetEvent(false);
+            tasks = new List<IMyTask<int>>();
         }
 
         [TearDown]
         public void TearDown()
         {
-            threadPool.Shutdown();
+            manualResetEvent.Dispose();
         }
 
         [Test]
         public void AggregateExceptionTest()
         {
+            using var threadPool = new MyThreadPool(threadCount);
             var task0 = threadPool.QueueWorkItem(() => 0);
             var task1 = task0.ContinueWith(x => 13 / x);
             var task2 = task1.ContinueWith(x => x + 1);
-
             Assert.Throws<AggregateException>(() => _ = task1.Result);
             Assert.Throws<AggregateException>(() => _ = task2.Result);
-        }
-
-        [Test]
-        public void ShutThreadPoolDownMoreThanOnceTest()
-        {
-            threadPool = new MyThreadPool(threadCount);
-            threadPool.Shutdown();
-            for (var i = 0; i < 100; ++i)
-            {
-                Assert.Throws<ThreadPoolWasShuttedDownException>(() => threadPool.Shutdown());
-            }
         }
 
         [TestCase(-2)]
@@ -63,15 +58,12 @@ namespace MyThreadPool.Tests
         [Test]
         public void ActualNumberOfThreadsInPoolIsEqualToThreadCountTest(int threadCount)
         {
-            threadPool = new MyThreadPool(threadCount);
-            var threadIds = new HashSet<int>();
-            var resetEvent = new ManualResetEvent(false);
-            var tasks = new List<IMyTask<int>>();            
+            using var threadPool = new MyThreadPool(threadCount);         
             for (var i = 0; i < 10000; ++i)
             {
                 var task = threadPool.QueueWorkItem(() =>
                 {
-                    resetEvent.WaitOne();
+                    manualResetEvent.WaitOne();
                     return Thread.CurrentThread.ManagedThreadId;
                 });
                 tasks.Add(task);
@@ -79,11 +71,11 @@ namespace MyThreadPool.Tests
 
             for (var i = 0; i < 5; ++i)
             {
-                resetEvent.Set();
-                resetEvent.Reset();
+                manualResetEvent.Set();
+                manualResetEvent.Reset();
                 Thread.Sleep(1000);
             }
-            resetEvent.Set();
+            manualResetEvent.Set();
 
             foreach (var task in tasks)
             {
@@ -102,7 +94,7 @@ namespace MyThreadPool.Tests
         [Test]
         public void ActiveThreadsPropertyValueIsEqualToThreadCountTest(int threadCount)
         {
-            threadPool = new MyThreadPool(threadCount);
+            using var threadPool = new MyThreadPool(threadCount);
             Assert.AreEqual(threadCount, threadPool.ActiveThreads);
         }
 
@@ -117,9 +109,58 @@ namespace MyThreadPool.Tests
         [Test]
         public void AreAllThreadsTerminatedAfterShutdownTest(int threadCount)
         {
-            threadPool = new MyThreadPool(threadCount);
+            using var threadPool = new MyThreadPool(threadCount);
             threadPool.Shutdown();
             Assert.AreEqual(0, threadPool.ActiveThreads);
+        }
+
+        [Test]
+        public void ShutThreadPoolDownMoreThanOnceTest()
+        {
+            using var threadPool = new MyThreadPool(threadCount);
+            threadPool.Shutdown();
+            for (var i = 0; i < 100; ++i)
+            {
+                Assert.Throws<ThreadPoolWasShuttedDownException>(() => threadPool.Shutdown());
+            }
+        }
+
+        [Test]
+        public void WhetherTheTasksThatWereQueuedBeforeShutdownAreFinishedAfterItTest()
+        {
+            var taskCount = 1000;
+            var tasks = new List<IMyTask<int>>();
+            var countDownEvent = new CountdownEvent(taskCount);
+
+            using var threadPool = new MyThreadPool(threadCount);
+            for (var i = 0; i < taskCount; ++i)
+            {
+                tasks.Add(threadPool.QueueWorkItem(() => 
+                {
+                    manualResetEvent.WaitOne();
+                    countDownEvent.Signal();
+                    return Thread.CurrentThread.ManagedThreadId;
+                }));
+            }
+
+            foreach (var task in tasks)
+            {
+                Assert.IsFalse(task.IsCompleted);
+            }
+
+            manualResetEvent.Set();
+            threadPool.Shutdown();
+
+            countDownEvent.Wait();
+            foreach (var task in tasks)
+            {
+                threadIds.Add(task.Result);
+                Assert.IsTrue(task.IsCompleted);
+            }
+
+            Assert.AreEqual(threadCount, threadIds.Count);
+
+            countDownEvent.Dispose();
         }
     }
 }
