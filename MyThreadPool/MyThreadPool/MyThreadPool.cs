@@ -106,7 +106,10 @@ namespace MyThreadPool
                     supplier = null;
                     while (continuations.Count != 0)
                     {
-                        continuations.TryDequeue(out Action action);
+                        if (!continuations.TryDequeue(out Action action))
+                        {
+                            continue;
+                        }
                         threadPool.AddTask(action);
                         lock (threadPool.locker)
                         {

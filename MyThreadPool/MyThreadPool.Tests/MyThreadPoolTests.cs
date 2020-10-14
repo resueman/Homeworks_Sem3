@@ -173,18 +173,17 @@ namespace MyThreadPool.Tests
         [Test]
         public void WhetherTheTasksThatWereQueuedBeforeShutdownAreFinishedAfterItTest()
         {
-            var tasks = new List<IMyTask<int>>();
             using var threadPool = new MyThreadPool(threadCount);
             for (var i = 0; i < taskCount; ++i)
             {
-                tasks.Add(threadPool.QueueWorkItem(() => 
+                intTasks.Add(threadPool.QueueWorkItem(() => 
                 {
                     manualResetEvent.WaitOne();
                     return Thread.CurrentThread.ManagedThreadId;
                 }));
             }
 
-            foreach (var task in tasks)
+            foreach (var task in intTasks)
             {
                 Assert.IsFalse(task.IsCompleted);
             }
@@ -192,7 +191,7 @@ namespace MyThreadPool.Tests
             manualResetEvent.Set();
             threadPool.Shutdown();
 
-            foreach (var task in tasks)
+            foreach (var task in intTasks)
             {
                 threadIds.Add(task.Result);
                 Assert.IsTrue(task.IsCompleted);
@@ -328,19 +327,60 @@ namespace MyThreadPool.Tests
         [Test]
         public void ContinueWithOnIncompletedTaskWorksCorrectlyTest()
         {
+            using var threadPool = new MyThreadPool(2);
+            var task = threadPool.QueueWorkItem(() => 
+            {
+                Thread.Sleep(2000); 
+                return 90; 
+            });
 
+            var continuation = task.ContinueWith(x => x + 10);
+
+            Assert.AreEqual(100, continuation.Result);
+            Assert.IsTrue(task.IsCompleted);
         }
 
         [Test]
         public void ContinueWithOnCompletedTaskWorksCorrectlyTest()
         {
+            using var threadPool = new MyThreadPool(2);
+            var task = threadPool.QueueWorkItem(() => 90);
+            _ = task.Result;
 
+            var continuation = task.ContinueWith(x => x + 10);
+
+            Assert.AreEqual(100, continuation.Result);
+            Assert.IsTrue(continuation.IsCompleted);
         }
 
         [Test]
         public void WhetherContinueWithThatWasQueuedBeforeShutdownIsFinishedAfterItTest()
         {
+            using var threadPool = new MyThreadPool(threadCount);
+            var task = threadPool.QueueWorkItem(() => 90);
+            _ = task.Result;
+            for (var i = 0; i < 5; ++i)
+            {
+                intTasks.Add(task.ContinueWith(x =>
+                {
+                    manualResetEvent.WaitOne();
+                    return x + 10;
+                }));
+            }
 
+            foreach (var t in intTasks)
+            {
+                Assert.IsFalse(t.IsCompleted);
+            }
+
+            manualResetEvent.Set();
+            threadPool.Shutdown();
+
+            foreach (var t in intTasks)
+            {
+                threadIds.Add(t.Result);
+                Assert.IsTrue(t.IsCompleted);
+            }
         }
 
         [Test]
