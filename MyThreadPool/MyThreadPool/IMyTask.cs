@@ -14,7 +14,8 @@ namespace MyThreadPool
         bool IsCompleted { get; }
 
         /// <summary>
-        /// Returns result of task evaluation
+        /// Returns the result of task evaluation if it is ready, 
+        /// otherwise blocks the calling thread until the end of evaluation
         /// </summary>
         TResult Result { get; }
 

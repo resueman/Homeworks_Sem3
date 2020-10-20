@@ -111,10 +111,6 @@ namespace MyThreadPool
                             continue;
                         }
                         threadPool.AddTask(action);
-                        lock (threadPool.locker)
-                        {
-                            Monitor.Pulse(threadPool.locker);
-                        }
                     }
                 }
             }

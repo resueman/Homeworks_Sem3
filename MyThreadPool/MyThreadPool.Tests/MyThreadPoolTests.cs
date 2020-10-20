@@ -14,8 +14,6 @@ namespace MyThreadPool.Tests
         private HashSet<int> threadIds;
         private ManualResetEvent manualResetEvent;
         private List<IMyTask<int>> intTasks;
-        private int taskCount;
-        private CountdownEvent countdownEvent;
 
         [SetUp]
         public void Setup()
@@ -24,15 +22,12 @@ namespace MyThreadPool.Tests
             threadIds = new HashSet<int>();
             manualResetEvent = new ManualResetEvent(false);
             intTasks = new List<IMyTask<int>>();
-            taskCount = 1000;
-            countdownEvent = new CountdownEvent(taskCount);
         }
 
         [TearDown]
         public void TearDown()
         {
             manualResetEvent.Dispose();
-            countdownEvent.Dispose();
         }
 
         [Test]
@@ -65,12 +60,21 @@ namespace MyThreadPool.Tests
         [Test]
         public void ActualNumberOfThreadsInPoolIsEqualToThreadCountTest(int threadCount)
         {
+            var locker = new object();
+            var countdownEvent = new CountdownEvent(threadCount - 1);
             using var threadPool = new MyThreadPool(threadCount);         
             for (var i = 0; i < 10000; ++i)
             {
                 var task = threadPool.QueueWorkItem(() =>
                 {
                     manualResetEvent.WaitOne();
+                    lock (locker)
+                    {
+                        if (countdownEvent.CurrentCount > 0)
+                        {
+                            countdownEvent.Signal();
+                        }
+                    }
                     return Thread.CurrentThread.ManagedThreadId;
                 });
                 intTasks.Add(task);
@@ -80,8 +84,9 @@ namespace MyThreadPool.Tests
             {
                 manualResetEvent.Set();
                 manualResetEvent.Reset();
-                Thread.Sleep(1000);
+                countdownEvent.Wait();
             }
+            countdownEvent.Dispose();
             manualResetEvent.Set();
 
             foreach (var task in intTasks)
@@ -174,7 +179,7 @@ namespace MyThreadPool.Tests
         public void WhetherTheTasksThatWereQueuedBeforeShutdownAreFinishedAfterItTest()
         {
             using var threadPool = new MyThreadPool(threadCount);
-            for (var i = 0; i < taskCount; ++i)
+            for (var i = 0; i < 1000; ++i)
             {
                 intTasks.Add(threadPool.QueueWorkItem(() => 
                 {
@@ -328,13 +333,15 @@ namespace MyThreadPool.Tests
         public void ContinueWithOnIncompletedTaskWorksCorrectlyTest()
         {
             using var threadPool = new MyThreadPool(2);
+            var autoResetEvent = new AutoResetEvent(false);
             var task = threadPool.QueueWorkItem(() => 
             {
-                Thread.Sleep(2000); 
+                autoResetEvent.WaitOne();
                 return 90; 
             });
 
             var continuation = task.ContinueWith(x => x + 10);
+            autoResetEvent.Set();
 
             Assert.AreEqual(100, continuation.Result);
             Assert.IsTrue(task.IsCompleted);
