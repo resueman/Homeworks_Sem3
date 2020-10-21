@@ -11,15 +11,13 @@ namespace MyThreadPool.Tests
     public class MyThreadPoolTests
     {
         private int threadCount;
-        private HashSet<int> threadIds;
         private List<IMyTask<int>> intTasks;
         private ManualResetEvent manualResetEvent;
 
         [SetUp]
         public void Setup()
         {
-            threadCount = Environment.ProcessorCount + 1;
-            threadIds = new HashSet<int>();
+            threadCount = Environment.ProcessorCount + 1;            
             manualResetEvent = new ManualResetEvent(false);
             intTasks = new List<IMyTask<int>>();
         }
@@ -89,6 +87,7 @@ namespace MyThreadPool.Tests
             countdownEvent.Dispose();
             manualResetEvent.Set();
 
+            var threadIds = new HashSet<int>();
             foreach (var task in intTasks)
             {
                 threadIds.Add(task.Result);
@@ -196,6 +195,7 @@ namespace MyThreadPool.Tests
             manualResetEvent.Set();
             threadPool.Shutdown();
 
+            var threadIds = new HashSet<int>();
             foreach (var task in intTasks)
             {
                 threadIds.Add(task.Result);
