@@ -12,8 +12,8 @@ namespace MyThreadPool.Tests
     {
         private int threadCount;
         private HashSet<int> threadIds;
-        private ManualResetEvent manualResetEvent;
         private List<IMyTask<int>> intTasks;
+        private ManualResetEvent manualResetEvent;
 
         [SetUp]
         public void Setup()
@@ -385,7 +385,7 @@ namespace MyThreadPool.Tests
 
             foreach (var t in intTasks)
             {
-                threadIds.Add(t.Result);
+                _ = t.Result;
                 Assert.IsTrue(t.IsCompleted);
             }
         }

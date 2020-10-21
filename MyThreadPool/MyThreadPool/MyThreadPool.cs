@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace MyThreadPool
@@ -94,7 +95,6 @@ namespace MyThreadPool
                 try
                 {
                     Result = supplier.Invoke();
-                    IsCompleted = true;
                 }
                 catch (Exception e)
                 {
@@ -102,6 +102,7 @@ namespace MyThreadPool
                 }
                 finally
                 {
+                    IsCompleted = true;
                     isCompletedResetEvent.Set();
                     supplier = null;
                     while (continuations.Count != 0)
@@ -110,7 +111,20 @@ namespace MyThreadPool
                         {
                             continue;
                         }
-                        threadPool.AddTask(action);
+                        try
+                        {
+                            threadPool.AddTask(action);
+                        }
+                        catch (ThreadPoolWasShuttedDownException newException)
+                        {
+                            var exceptions = new List<Exception>();
+                            if (aggregateException != null)
+                            {
+                                exceptions.AddRange(aggregateException.InnerExceptions);
+                            }
+                            exceptions.Add(newException);
+                            aggregateException = new AggregateException(exceptions);
+                        }
                     }
                 }
             }
