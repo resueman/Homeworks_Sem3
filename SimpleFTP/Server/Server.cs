@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace SimpleFTP
 {
@@ -32,43 +33,47 @@ namespace SimpleFTP
                     while (true)
                     {
                         var request = await streamReader.ReadLineAsync();
-                        var response = await ProcessRequest(request);
-                        await streamWriter.WriteLineAsync(response);
+                        await ProcessRequest(request, streamWriter);
                     }
                 });
             }
         }
 
-        private async Task<string> ProcessRequest(string request)
+        private async Task ProcessRequest(string request, StreamWriter streamWriter)
         {
             var regex = new Regex(@"([12]){1}?\s+(.+)");
             var match = regex.Match(request);
             if (!match.Success)
             {
-                return "Incorrect request, try again";
+                await streamWriter.WriteAsync("Incorrect request, try again");
             }
 
             var (command, path) = (int.Parse(match.Groups[1].Value),
                 match.Groups[2].Value);
 
-            var response = "";
+            path = Path.GetFullPath(path);
+
             switch (command)
             {
                 case 1:
                     var (size, list) = List(path);
-                    response = $"{size} ";
+                    var listResponse = $"{size} ";
                     foreach (var (name, isDirectory) in list)
                     {
-                        response += $"{name} " + $"{isDirectory} ";
+                        listResponse += $"{name} " + $"{isDirectory} ";
                     }
+                    await streamWriter.WriteLineAsync(listResponse);
                     break;
                 case 2:
                     var (contentSize, content) = await Get(path);
-                    response = $"{contentSize} " + $"{content}";
+                    var sizeInString = $"{contentSize} ";
+                    var sizeInBytes = Encoding.UTF8.GetBytes(sizeInString);
+                    var response = new byte[sizeInString.Length + contentSize];
+                    sizeInBytes.CopyTo(response, 0);
+                    content.CopyTo(response, sizeInBytes.Length);
+                    await streamWriter.BaseStream.WriteAsync(response);
                     break;
             }
-
-            return response;
         }
 
         private (int size, IEnumerable<(string name, bool isDirectory)> list) List(string path)
@@ -95,7 +100,12 @@ namespace SimpleFTP
                 return (-1, null);
             }
 
-            var content = await File.ReadAllBytesAsync(path);
+            var size = new FileInfo(path).Length;
+            var content = new byte[size];
+            using (var fileStream = new FileStream(path, FileMode.Open))
+            {
+                await fileStream.ReadAsync(content);
+            }
 
             return (content.Length, content);
         }

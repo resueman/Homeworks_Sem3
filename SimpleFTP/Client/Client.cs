@@ -5,49 +5,62 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace SimpleFTP
 {
     public class Client : IDisposable
     {
         private readonly TcpClient client;
-        private readonly NetworkStream stream;
-        private readonly StreamReader reader;
-        private readonly StreamWriter writer;
+        private readonly int port;
+        private readonly string hostname;
+        private bool isConnected;
 
-        public Client()
+        private NetworkStream networkStream;
+        private StreamReader reader;
+        private StreamWriter writer;
+
+        public Client(string hostname = "127.0.0.1", int port = 8888)
         {
             client = new TcpClient();
-            stream = client.GetStream();
-            reader = new StreamReader(stream);
-            writer = new StreamWriter(stream) { AutoFlush = true };
+            this.hostname = hostname;
+            this.port = port;
         }
 
-        public async Task<bool> ConnectToSever(string hostname = "127.0.0.1", int port = 8888)
+        private async Task ConnectToSever()
         {
             var timeout = 10;
-            var maxTimeout = 1000000;
+            var maxTimeout = 100000;
             while (timeout < maxTimeout)
             {
                 try
                 {
                     await client.ConnectAsync(hostname, port);
-                    return true;
+                    networkStream = client.GetStream();
+                    reader = new StreamReader(networkStream);
+                    writer = new StreamWriter(networkStream) { AutoFlush = true };
+                    isConnected = true;
+                    return;
                 }
                 catch (SocketException)
                 {
-                    Thread.Sleep(timeout);
+                    await Task.Delay(timeout);
                     timeout *= 2;
                 }
             }
-            return false;
+
+            throw new TimeoutException("Can't connect to server");
         }
 
         public async Task<(int size, IEnumerable<(string name, bool isDirectory)> directoryContent)> List(string pathToDirectory)
         {
+            if (!isConnected)
+            {
+                await ConnectToSever();
+            }
+
             await writer.WriteLineAsync($"1 {pathToDirectory}");
 
+            await WaitForResponse();
             var response = await reader.ReadLineAsync();
             var splitted = response.Replace("  ", " ").Trim().Split(' ');
             var size = int.Parse(splitted[0]);
@@ -62,22 +75,66 @@ namespace SimpleFTP
 
         public async Task<(long size, byte[] content)> Get(string pathToFile)
         {
+            if (!isConnected)
+            {
+                await ConnectToSever();
+            }
+
             await writer.WriteLineAsync($"2 {pathToFile}");
 
-            var response = await reader.ReadLineAsync();
-            var regex = new Regex(@"(\d+)\s*(.+)?");
-            var match = regex.Match(response);
-            var size = long.Parse(match.Groups[1].Value[0].ToString());
-            var content = Encoding.Unicode.GetBytes(match.Groups[1].Value[1].ToString());
+            var responseBytes = await ReceiveBytes();            
 
-            return (size, content);
+            var responseString = Encoding.UTF8.GetString(responseBytes);
+            var size = Regex.Match(responseString, @"-?\d+\s?").Value;
+            if (size.Trim() == "-1")
+            {
+                return (-1, null);
+            }
+
+            var sizeInBytes = Encoding.UTF8.GetBytes(size);
+            var content = new byte[responseBytes.Length - sizeInBytes.Length];
+            Array.Copy(responseBytes, sizeInBytes.Length, content, 0, content.Length);
+
+            return (long.Parse(size), content);
+        }
+
+        private async Task WaitForResponse()
+        {
+            var timeout = 10;
+            var maxTimeout = 10000000;
+            while (timeout < maxTimeout)
+            {
+                if (networkStream.DataAvailable)
+                {
+                    return;
+                }
+                await Task.Delay(timeout);
+                timeout *= 2;
+            }
+
+            throw new TimeoutException("Server response timed out");
+        }
+
+        private async Task<byte[]> ReceiveBytes()
+        {
+            await WaitForResponse();
+
+            var response = new byte[0];
+            var receiveBuffer = new byte[client.ReceiveBufferSize];
+            while (networkStream.DataAvailable)
+            {
+                var actuallyReceived = await networkStream.ReadAsync(receiveBuffer, 0, receiveBuffer.Length);
+                Array.Resize(ref response, response.Length + actuallyReceived);
+                Array.Copy(receiveBuffer, response, actuallyReceived);
+            }
+
+            return response;
         }
 
         public void Dispose()
         {
-            Console.WriteLine("Disposed");
             client.Close();
-            stream.Dispose();
+            networkStream.Dispose();
             reader.Dispose();
             writer.Dispose();
         }
