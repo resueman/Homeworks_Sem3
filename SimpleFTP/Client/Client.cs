@@ -11,97 +11,80 @@ namespace SimpleFTP
     public class Client : IDisposable
     {
         private readonly TcpClient client;
-        private readonly int port;
-        private readonly string hostname;
-        private bool isConnected;
-
-        private NetworkStream networkStream;
-        private StreamReader reader;
-        private StreamWriter writer;
+        private readonly NetworkStream networkStream;
+        private readonly StreamReader reader;
+        private readonly StreamWriter writer;
 
         public Client(string hostname = "127.0.0.1", int port = 8888)
         {
-            client = new TcpClient();
-            this.hostname = hostname;
-            this.port = port;
-        }
-
-        private async Task ConnectToSever()
-        {
-            var timeout = 10;
-            var maxTimeout = 100000;
-            while (timeout < maxTimeout)
+            try
             {
-                try
-                {
-                    await client.ConnectAsync(hostname, port);
-                    networkStream = client.GetStream();
-                    reader = new StreamReader(networkStream);
-                    writer = new StreamWriter(networkStream) { AutoFlush = true };
-                    isConnected = true;
-                    return;
-                }
-                catch (SocketException)
-                {
-                    await Task.Delay(timeout);
-                    timeout *= 2;
-                }
+                client = new TcpClient(hostname, port);
+                networkStream = client.GetStream();
+                reader = new StreamReader(networkStream);
+                writer = new StreamWriter(networkStream) { AutoFlush = true };
             }
-
-            throw new TimeoutException("Can't connect to server");
-        }
+            catch (SocketException e)
+            {
+                throw new ConnectionToServerException("Connection to server failed", e);
+            }
+        } 
 
         public async Task<(int size, IEnumerable<(string name, bool isDirectory)> directoryContent)> List(string pathToDirectory)
         {
-            if (!isConnected)
+            try
             {
-                await ConnectToSever();
+                await writer.WriteLineAsync($"1 {pathToDirectory}");
+
+                await WaitForResponse();
+                var response = await reader.ReadLineAsync();
+                var splitted = response.Replace("  ", " ").Trim().Split(' ');
+                var size = int.Parse(splitted[0]);
+                var directoryContent = new List<(string name, bool isDirectory)>();
+                for (var i = 2; i < splitted.Length; ++i)
+                {
+                    directoryContent.Add((splitted[i - 1], bool.Parse(splitted[i])));
+                }
+
+                return (size, directoryContent.Count > 0 ? directoryContent : null);
             }
-
-            await writer.WriteLineAsync($"1 {pathToDirectory}");
-
-            await WaitForResponse();
-            var response = await reader.ReadLineAsync();
-            var splitted = response.Replace("  ", " ").Trim().Split(' ');
-            var size = int.Parse(splitted[0]);
-            var directoryContent = new List<(string name, bool isDirectory)>();
-            for (var i = 2; i < splitted.Length; ++i)
+            catch (SocketException e)
             {
-                directoryContent.Add((splitted[i - 1], bool.Parse(splitted[i])));
+                throw new ConnectionToServerException(e.Message, e);
             }
-
-            return (size, directoryContent.Count > 0 ? directoryContent : null);
         }
 
         public async Task<(long size, byte[] content)> Get(string pathToFile)
         {
-            if (!isConnected)
+            try
             {
-                await ConnectToSever();
+                await writer.WriteLineAsync($"2 {pathToFile}");
+
+                var responseBytes = await ReceiveBytes();
+
+                var responseString = Encoding.UTF8.GetString(responseBytes);
+                var size = Regex.Match(responseString, @"-?\d+\s?").Value;
+                if (size.Trim() == "-1")
+                {
+                    return (-1, null);
+                }
+
+                var sizeInBytes = Encoding.UTF8.GetBytes(size);
+                var content = new byte[responseBytes.Length - sizeInBytes.Length];
+                Array.Copy(responseBytes, sizeInBytes.Length, content, 0, content.Length);
+
+                return (long.Parse(size), content);
             }
-
-            await writer.WriteLineAsync($"2 {pathToFile}");
-
-            var responseBytes = await ReceiveBytes();            
-
-            var responseString = Encoding.UTF8.GetString(responseBytes);
-            var size = Regex.Match(responseString, @"-?\d+\s?").Value;
-            if (size.Trim() == "-1")
+            catch (SocketException e)
             {
-                return (-1, null);
+                throw new ConnectionToServerException(e.Message, e);
             }
-
-            var sizeInBytes = Encoding.UTF8.GetBytes(size);
-            var content = new byte[responseBytes.Length - sizeInBytes.Length];
-            Array.Copy(responseBytes, sizeInBytes.Length, content, 0, content.Length);
-
-            return (long.Parse(size), content);
         }
 
         private async Task WaitForResponse()
         {
             var timeout = 10;
-            var maxTimeout = 10000000;
+            var maxTimeout = 1000000;
             while (timeout < maxTimeout)
             {
                 if (networkStream.DataAvailable)
@@ -111,8 +94,7 @@ namespace SimpleFTP
                 await Task.Delay(timeout);
                 timeout *= 2;
             }
-
-            throw new TimeoutException("Server response timed out");
+            throw new ConnectionToServerException("Server response timed out");
         }
 
         private async Task<byte[]> ReceiveBytes()
@@ -134,7 +116,6 @@ namespace SimpleFTP
         public void Dispose()
         {
             client.Close();
-            networkStream.Dispose();
             reader.Dispose();
             writer.Dispose();
         }

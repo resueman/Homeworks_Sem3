@@ -57,6 +57,10 @@ namespace SimpleFTP
             {
                 case 1:
                     var (size, list) = List(path);
+                    if (size == -1)
+                    {
+                        await streamWriter.WriteLineAsync(size.ToString());
+                    }
                     var listResponse = $"{size} ";
                     foreach (var (name, isDirectory) in list)
                     {
