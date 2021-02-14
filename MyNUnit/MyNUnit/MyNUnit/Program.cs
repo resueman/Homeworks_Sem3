@@ -11,8 +11,7 @@ namespace MyNUnit
 
         private static async Task MainAsync()
         {
-            var testRunner = new TestRunner();
-            await testRunner.Run("nfjjtnt");
+            await TestRunner.Run("nfjjtnt");
         }
     }
 }
