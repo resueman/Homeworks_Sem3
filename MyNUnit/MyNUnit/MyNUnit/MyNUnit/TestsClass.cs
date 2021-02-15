@@ -11,44 +11,60 @@ namespace MyNUnit
         public TestsClass(Type type)
         {
             TestClassType = type;
-
-            TestMethods = GetAttributeMethods(type, typeof(TestAttribute))
-                .Select(m => new TestMethod(m)).ToList();
-            
-            BeforeTestMethods = GetAttributeMethods(type, typeof(BeforeAttribute))
-                .Select(m => new FixtureMethod(m)).ToList();
-            
-            AfterTestMethods = GetAttributeMethods(type, typeof(AfterAttribute))
-                .Select(m => new FixtureMethod(m)).ToList();
-
-            BeforeClassMethods = GetAttributeMethods(type, typeof(BeforeClassAttribute))
-                .Select(m => new StaticFixtureMethod(m)).ToList();
-
-            AfterClassMethods = GetAttributeMethods(type, typeof(AfterClassAttribute))
-                .Select(m => new StaticFixtureMethod(m)).ToList();
+            FindAllMyNUnitMethods();
         }
 
         public Type TestClassType { get; private set; }
 
         public List<TestMethod> TestMethods { get; private set; }
 
-        public List<FixtureMethod> BeforeTestMethods { get; private set; }
+        public List<FixtureMethod> BeforeMethods { get; private set; }
 
-        public List<FixtureMethod> AfterTestMethods { get; private set; }
+        public List<FixtureMethod> AfterMethods { get; private set; }
 
         public List<StaticFixtureMethod> BeforeClassMethods { get; private set; }
 
         public List<StaticFixtureMethod> AfterClassMethods { get; private set; }
 
-        private List<MethodInfo> GetAttributeMethods(Type type, Type attributeType) // здесь ловушка!!!
-            => type.GetMethods().Where(m => m.GetCustomAttributes(attributeType).ToList().Count > 0).ToList();
-
         public void RunTests()
         {
-            var testClassInstance = Convert.ChangeType(Activator.CreateInstance(TestClassType), TestClassType);
+            var testClassInstance = Activator.CreateInstance(TestClassType);
             BeforeClassMethods.ForEach(m => m.Execute(null));
             Parallel.ForEach(TestMethods, m => m.Execute(testClassInstance));
             BeforeClassMethods.ForEach(m => m.Execute(null));
+        }
+
+        private async Task FindAllMyNUnitMethods()
+        {
+            var tasks = new List<Task>()
+            {
+                Task.Run(() => TestMethods = TestClassType.GetMethods()
+                    .Where(m => TestMethod.IsTestMethod(m))
+                    .Select(m => new TestMethod(m))
+                    .ToList()),
+
+                Task.Run(() => BeforeMethods = TestClassType.GetMethods()
+                    .Where(m => FixtureMethod.IsFixtureMethod(m))
+                    .Select(m => new FixtureMethod(m))
+                    .ToList()),
+
+                Task.Run(() => AfterMethods = TestClassType.GetMethods()
+                    .Where(m => FixtureMethod.IsFixtureMethod(m))
+                    .Select(m => new FixtureMethod(m))
+                    .ToList()),
+
+                Task.Run(() => BeforeClassMethods = TestClassType.GetMethods()
+                    .Where(m => StaticFixtureMethod.IsStaticFixtureMethod(m))
+                    .Select(m => new StaticFixtureMethod(m))
+                    .ToList()),
+
+                Task.Run(() => AfterClassMethods = TestClassType.GetMethods()
+                    .Where(m => StaticFixtureMethod.IsStaticFixtureMethod(m))
+                    .Select(m => new StaticFixtureMethod(m))
+                    .ToList())
+            };
+
+            await Task.WhenAll(tasks);
         }
     }
 }

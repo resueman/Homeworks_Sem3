@@ -2,7 +2,7 @@
 
 namespace MyNUnit
 {
-    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
     public class TestAttribute : Attribute
     {
         public Type Expected { get; set; }

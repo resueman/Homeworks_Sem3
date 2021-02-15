@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -10,10 +12,13 @@ namespace MyNUnit
         public static async Task Run(string path)
         {
             var tasks = new List<Task>();
-            var directoryAssemblies = Directory.GetFiles(path, @"$(?:.exe|.dll)");
+            var directoryAssemblies = Directory.GetFiles(path, @"$(?:.exe|.dll)").ToList();
+            var currentAssembly = directoryAssemblies.SingleOrDefault(a => a == Assembly.GetExecutingAssembly().GetName().Name); ///
+            directoryAssemblies.Remove(currentAssembly);
             foreach (var assemblyName in directoryAssemblies)
             {
-                foreach (var type in Assembly.Load(assemblyName).ExportedTypes)
+                var types = Assembly.Load(assemblyName).ExportedTypes.Where(t => t.IsClass).ToList();
+                foreach (var type in types)
                 {
                     var testsClass = new TestsClass(type);
                     var task = Task.Run(() => testsClass.RunTests());
@@ -21,6 +26,11 @@ namespace MyNUnit
                 }
             }
             await Task.WhenAll(tasks);
+        }
+
+        public static void PrintResult()
+        {
+
         }
     }
 }
