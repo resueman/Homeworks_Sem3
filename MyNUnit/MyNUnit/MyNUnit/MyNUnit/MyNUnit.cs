@@ -20,7 +20,7 @@ namespace MyNUnit
                 var types = Assembly.Load(assemblyName).ExportedTypes.Where(t => t.IsClass).ToList();
                 foreach (var type in types)
                 {
-                    var testsClass = new TestsClass(type);
+                    var testsClass = new MyNUnitTestsClass(type);
                     var task = Task.Run(() => testsClass.RunTests());
                     tasks.Add(task);
                 }

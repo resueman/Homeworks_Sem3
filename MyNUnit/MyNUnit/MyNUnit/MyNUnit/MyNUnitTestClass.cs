@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace MyNUnit
 {
-    class TestsClass
+    class MyNUnitTestsClass
     {
-        public TestsClass(Type type)
+        public MyNUnitTestsClass(Type type)
         {
             TestClassType = type;
-            FindAllMyNUnitMethods();
         }
 
         public Type TestClassType { get; private set; }
@@ -26,45 +25,55 @@ namespace MyNUnit
 
         public List<StaticFixtureMethod> AfterClassMethods { get; private set; }
 
-        public void RunTests()
+        public async Task RunTests()
         {
             var testClassInstance = Activator.CreateInstance(TestClassType);
+            await DiscoverAllMyNUnitMethods();
             BeforeClassMethods.ForEach(m => m.Execute(null));
             Parallel.ForEach(TestMethods, m => m.Execute(testClassInstance));
             BeforeClassMethods.ForEach(m => m.Execute(null));
         }
 
-        private async Task FindAllMyNUnitMethods()
+        private async Task DiscoverAllMyNUnitMethods()
         {
             var tasks = new List<Task>()
-            {
-                Task.Run(() => TestMethods = TestClassType.GetMethods()
-                    .Where(m => TestMethod.IsTestMethod(m))
-                    .Select(m => new TestMethod(m))
-                    .ToList()),
-
+            {                    
                 Task.Run(() => BeforeMethods = TestClassType.GetMethods()
-                    .Where(m => FixtureMethod.IsFixtureMethod(m))
+                    .Where(m => m.GetCustomAttributes<BeforeAttribute>().Any())
                     .Select(m => new FixtureMethod(m))
                     .ToList()),
 
                 Task.Run(() => AfterMethods = TestClassType.GetMethods()
-                    .Where(m => FixtureMethod.IsFixtureMethod(m))
+                    .Where(m => m.GetCustomAttributes<AfterAttribute>().Any())
                     .Select(m => new FixtureMethod(m))
                     .ToList()),
 
                 Task.Run(() => BeforeClassMethods = TestClassType.GetMethods()
-                    .Where(m => StaticFixtureMethod.IsStaticFixtureMethod(m))
+                    .Where(m => m.GetCustomAttributes<BeforeClassAttribute>().Any())
                     .Select(m => new StaticFixtureMethod(m))
                     .ToList()),
 
                 Task.Run(() => AfterClassMethods = TestClassType.GetMethods()
-                    .Where(m => StaticFixtureMethod.IsStaticFixtureMethod(m))
+                    .Where(m => m.GetCustomAttributes<AfterClassAttribute>().Any())
                     .Select(m => new StaticFixtureMethod(m))
                     .ToList())
             };
 
-            await Task.WhenAll(tasks);
+            Exception exception = null;
+            try
+            {
+                await Task.WhenAll(tasks);
+            }
+            catch (IncorrectSignatureOfMyNUnitMethodException e)
+            {
+                exception = e;
+            }
+
+            var errorMessage = exception != null ? exception.Message : "";
+            await Task.Run(() => TestMethods = TestClassType.GetMethods()
+                .Where(m => m.GetCustomAttributes<TestAttribute>().Any())
+                .Select(m => new TestMethod(m, errorMessage))
+                .ToList());   
         }
     }
 }

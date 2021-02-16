@@ -1,44 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace MyNUnit
 {
     public class StaticFixtureMethod : MyNUnitMethod
     {
-        private MethodInfo method;
+        private readonly MethodInfo method;
 
         public StaticFixtureMethod(MethodInfo method)
         {
-            if (!IsStaticFixtureMethod(method))
-            {
-                NotifyUserAboutError();
-            }
-            this.method = method;
-        }
-
-        public static bool IsStaticFixtureMethod(MethodInfo method) 
-            => method.IsStatic && method.IsPublic && method.ReturnType == typeof(void);
-
-        private void NotifyUserAboutError()
-        {
-            var exceptions = new List<Exception>();
             if (!method.IsStatic)
             {
-                exceptions.Add(new Exception("Static fixture method should be static"));
+                throw new IncorrectSignatureOfMyNUnitMethodException("Static fixture method should be static, not instance");
             }
-            if (!method.IsPublic) //////////////////////
+            if (!method.IsPublic && !method.IsAssembly)
             {
-                exceptions.Add(new Exception("Static fixture method should be public"));
+                throw new IncorrectSignatureOfMyNUnitMethodException("Static fixture method should be public or internal");
             }
             if (method.ReturnType != typeof(void))
             {
-                exceptions.Add(new Exception("Static fixture method should have void return type"));
+                throw new IncorrectSignatureOfMyNUnitMethodException("Static fixture method should have void return type");
             }
-            if (exceptions.Count != 0)
-            {
-                throw new AggregateException("One or many errors occured", exceptions);
-            }
+            this.method = method;
         }
 
         public override void Execute(object instance)
