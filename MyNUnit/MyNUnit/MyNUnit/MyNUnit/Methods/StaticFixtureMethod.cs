@@ -8,18 +8,21 @@ namespace MyNUnit
 
         public StaticFixtureMethod(MethodInfo method)
         {
-            if (!method.IsStatic)
+            var errorMessage = !method.IsStatic
+                ? "Static fixture method must be static, not instance"
+                : method.IsPrivate
+                    ? "Static fixture method must be public or internal"
+                    : method.ReturnType != typeof(void)
+                        ? "Static fixture method must have void return type"
+                        : method.GetParameters().Length > 0
+                            ? "Static fixture method must have no parameters"
+                            : "";
+
+            if (!string.IsNullOrEmpty(errorMessage))
             {
-                throw new IncorrectSignatureOfMyNUnitMethodException("Static fixture method should be static, not instance");
+                throw new IncorrectSignatureOfMyNUnitMethodException(errorMessage);
             }
-            if (!method.IsPublic && !method.IsAssembly)
-            {
-                throw new IncorrectSignatureOfMyNUnitMethodException("Static fixture method should be public or internal");
-            }
-            if (method.ReturnType != typeof(void))
-            {
-                throw new IncorrectSignatureOfMyNUnitMethodException("Static fixture method should have void return type");
-            }
+
             this.method = method;
         }
 

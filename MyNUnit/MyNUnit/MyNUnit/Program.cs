@@ -4,14 +4,9 @@ namespace MyNUnit
 {
     class Program
     {
-        static void Main()
+        public static async Task Main()
         {
-            MainAsync().GetAwaiter().GetResult();
-        }
-
-        private static async Task MainAsync()
-        {
-            await MyNUnit.Run("nfjjtnt");
+            // await MyNUnit.Run(@"C:\Users\User\Desktop\Homeworks_Sem3\MyNUnit\MyNUnit\TestProject\bin\Debug\netcoreapp3.1");
         }
     }
 }

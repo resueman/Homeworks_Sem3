@@ -9,7 +9,7 @@ namespace MyNUnit
         {
             Status = status;
             ExecutionTime = executionTime;
-            ErrorMessage = errorMessage;
+            Message = errorMessage;
             StackTrace = stackTrace;
         }
 
@@ -17,7 +17,7 @@ namespace MyNUnit
 
         public TimeSpan ExecutionTime { get; private set; }
 
-        public string ErrorMessage { get; private set; }
+        public string Message { get; private set; }
 
         public string StackTrace { get; private set; }
     }

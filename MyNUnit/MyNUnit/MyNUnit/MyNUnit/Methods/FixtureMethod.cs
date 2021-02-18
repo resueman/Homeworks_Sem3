@@ -8,18 +8,21 @@ namespace MyNUnit
 
         public FixtureMethod(MethodInfo method)
         {
-            if (method.IsStatic)
+            var errorMessage = method.IsStatic
+                ? "Fixture methods, maked with Before and After attributes, must be instance, not static"
+                : method.IsPrivate
+                    ? "Fixture methods, maked with Before and After attributes, must be public or internal"
+                    : method.ReturnType != typeof(void)
+                        ? "Fixture methods, maked with Before and After attributes, must have void return type"
+                        : method.GetParameters().Length > 0
+                            ? "Fixture methods, maked with Before and After attributes, must have no parameters"
+                            : "";
+
+            if (!string.IsNullOrEmpty(errorMessage))
             {
-                throw new IncorrectSignatureOfMyNUnitMethodException("Fixture methods, maked with Before and After attributes, should be instance, not static");
+                throw new IncorrectSignatureOfMyNUnitMethodException(errorMessage);
             }
-            if (!method.IsPublic && !method.IsAssembly)
-            {
-                throw new IncorrectSignatureOfMyNUnitMethodException("Fixture methods, maked with Before and After attributes, should be public or internal");
-            }
-            if (method.ReturnType != typeof(void))
-            {
-                throw new IncorrectSignatureOfMyNUnitMethodException("Fixture methods, maked with Before and After attributes, should have void return type");
-            }
+
             this.method = method;
         }
 

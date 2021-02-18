@@ -4,10 +4,12 @@ namespace MyNUnitTests
 {
     public class Tests
     {
+        int a = 0;
+
         [SetUp]
-        public void Setup()
+        void Setup()
         {
-            
+            a = 5;
         }
 
         [OneTimeSetUp]
@@ -19,7 +21,7 @@ namespace MyNUnitTests
         [Test]
         public void Test1()
         {
-            Assert.Pass();
+            Assert.AreEqual(5, a);
         }
 
         [Test]
