@@ -4,7 +4,7 @@ environment:
     matrix:
       - solution_name: ParallelAndSynchronousMatrixMultiplication/ParallelAndSynchronousMatrixMultiplication.sln
       - solution_name: Lazy/Lazy.sln
-      - solution_name: MyNUnit/MyNUnit.sln
+      - solution_name: MyNUnit/MyNUnit/MyNUnit.sln
     
 before_build:
   - nuget restore %solution_name%
