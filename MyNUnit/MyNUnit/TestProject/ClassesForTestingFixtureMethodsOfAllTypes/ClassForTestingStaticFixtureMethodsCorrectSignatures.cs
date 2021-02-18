@@ -3,6 +3,9 @@ using System;
 
 namespace TestProject
 {
+    /// <summary>
+    /// Example of MyNUnit tests class
+    /// </summary>
     public class ClassForTestingStaticFixtureMethodsCorrectSignatures
     {
         private static int counter = 1;

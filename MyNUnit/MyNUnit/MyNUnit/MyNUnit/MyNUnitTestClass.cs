@@ -6,8 +6,15 @@ using System.Threading.Tasks;
 
 namespace MyNUnit
 {
+    /// <summary>
+    /// Represents tests class of MyNUnit
+    /// </summary>
     public class MyNUnitTestsClass
     {
+        /// <summary>
+        /// Creates instance of MyNUnitTestsClass class
+        /// </summary>
+        /// <param name="type">Type of tests class</param>
         public MyNUnitTestsClass(Type type)
         {
             TestClassType = type;
@@ -18,18 +25,40 @@ namespace MyNUnit
             AfterClassMethods = new List<StaticFixtureMethod>();
         }
 
+        /// <summary>
+        /// Type representing tests class of MyNUnit
+        /// </summary>
         public Type TestClassType { get; private set; }
 
+        /// <summary>
+        /// Tests methods, marked with Test attribute, containing in MyNUnit tests class
+        /// </summary>
         public List<TestMethod> TestMethods { get; private set; }
 
+        /// <summary>
+        /// Methods, marked with Before attribute, containing in MyNUnit tests class
+        /// </summary>
         public List<FixtureMethod> BeforeMethods { get; private set; }
 
+        /// <summary>
+        /// Methods, marked with After attribute, containing in MyNUnit tests class
+        /// </summary>
         public List<FixtureMethod> AfterMethods { get; private set; }
 
+        /// <summary>
+        /// Methods, marked with BeforeClass attribute, containing in MyNUnit tests class
+        /// </summary>
         public List<StaticFixtureMethod> BeforeClassMethods { get; private set; }
 
+        /// <summary>
+        /// Methods, marked with AfterClass attribute, containing in MyNUnit tests class
+        /// </summary>
         public List<StaticFixtureMethod> AfterClassMethods { get; private set; }
 
+        /// <summary>
+        /// Runs tests
+        /// </summary>
+        /// <returns>Task representing tests running</returns>
         public async Task RunTests()
         {
             var testClassInstance = Activator.CreateInstance(TestClassType);
@@ -44,6 +73,10 @@ namespace MyNUnit
             AfterClassMethods.ForEach(m => m.Execute(null));
         }
 
+        /// <summary>
+        /// Discovers MyNUnit methods that was marked with MyNUnit attributes
+        /// </summary>
+        /// <returns></returns>
         private async Task DiscoverAllMyNUnitMethods()
         {
             var tasks = new List<Task>()

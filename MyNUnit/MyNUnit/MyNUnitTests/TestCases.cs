@@ -1,5 +1,8 @@
 ﻿namespace MyNUnitTests
 {
+    /// <summary>
+    /// Test cases for MyNUnit testing
+    /// </summary>
     public class TestCases
     {
         private static readonly object[] IncorrectTestMethodSignatureTestCases =

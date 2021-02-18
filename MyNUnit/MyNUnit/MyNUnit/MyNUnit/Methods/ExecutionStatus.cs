@@ -1,5 +1,8 @@
 ﻿namespace MyNUnit
 {
+    /// <summary>
+    /// Shows success of the test
+    /// </summary>
     public enum ExecutionStatus
     {
         Executing = 0,

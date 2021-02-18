@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace MyNUnitTests
 {
+    /// <summary>
+    /// Contains tests for MyNUnit
+    /// </summary>
     public class Tests
     {
         private static List<MyNUnit.MyNUnitTestsClass> testsClasses;
@@ -12,7 +15,7 @@ namespace MyNUnitTests
         [OneTimeSetUp]
         public static void BeforeClass()
         {
-            testsClasses = MyNUnit.MyNUnit.Run(@"C:\Users\User\Desktop\Homeworks_Sem3\MyNUnit\MyNUnit\TestProject\bin\Debug\netcoreapp3.1").Result;
+            testsClasses = MyNUnit.MyNUnit.Run(@"./../../../..\TestProject\bin\Debug\netcoreapp3.1").Result;
         }
 
         [TestCaseSource(typeof(TestCases), "IncorrectTestMethodSignatureTestCases", Category = "Incorrect Test Method Signature")]

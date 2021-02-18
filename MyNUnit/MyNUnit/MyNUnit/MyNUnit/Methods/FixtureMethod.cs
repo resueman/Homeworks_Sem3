@@ -2,10 +2,17 @@
 
 namespace MyNUnit
 {
+    /// <summary>
+    /// Identifies method marked with AfterAttribute or BeforeAttribute
+    /// </summary>
     public class FixtureMethod : MyNUnitMethod
     {
         private readonly MethodInfo method;
 
+        /// <summary>
+        /// Creates instance of FixtureMethod class
+        /// </summary>
+        /// <param name="method">Method</param>
         public FixtureMethod(MethodInfo method)
         {
             var errorMessage = method.IsStatic
@@ -26,6 +33,10 @@ namespace MyNUnit
             this.method = method;
         }
 
+        /// <summary>
+        /// Executes fixture method
+        /// </summary>
+        /// <param name="instance">Test class instance on which to execute method</param>
         public override void Execute(object instance) 
             => method.Invoke(instance, null);
     }

@@ -2,6 +2,9 @@
 
 namespace TestProject
 {
+    /// <summary>
+    /// Example of MyNUnit tests class
+    /// </summary>
     public class ClassWithNonStaticStaticFixtureMethods
     {
         [BeforeClass]

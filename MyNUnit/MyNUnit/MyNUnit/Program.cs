@@ -3,12 +3,16 @@ using System.Threading.Tasks;
 
 namespace MyNUnit
 {
+    /// <summary>
+    /// Class for user interaction
+    /// </summary>
     class Program
     {
         public static async Task Main()
         {
-            //var path = Console.ReadLine();
-            //await MyNUnit.Run(path);
-            await MyNUnit.Run(@"C:\Users\User\Desktop\Homeworks_Sem3\MyNUnit\MyNUnit\TestProject\bin\Debug\netcoreapp3.1");        }
+            Console.WriteLine("Введите путь: ");
+            var path = Console.ReadLine();
+            await MyNUnit.Run(path);
+        }
     }
 }

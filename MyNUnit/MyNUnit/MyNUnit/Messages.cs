@@ -1,5 +1,8 @@
 ﻿namespace MyNUnit
 {
+    /// <summary>
+    /// Messages that user of MyNUnit can receive
+    /// </summary>
     public static class Messages
     {
         public const string TestMustBePublic = "Test method must be public";

@@ -4,8 +4,17 @@ using System.Reflection;
 
 namespace MyNUnit
 {
+    /// <summary>
+    /// Identifies method marked with TestAttribute
+    /// </summary>
     public class TestMethod : MyNUnitMethod
     {
+        /// <summary>
+        /// Creates instance of TestMethod class
+        /// </summary>
+        /// <param name="method">Method</param>
+        /// <param name="errorMessage">Message send by any type of fixture methods
+        /// in case of error occured during their execution</param>
         public TestMethod(MethodInfo method, string errorMessage)
         {
             Method = method;
@@ -28,10 +37,20 @@ namespace MyNUnit
             }
         }
 
+        /// <summary>
+        /// Represents executed method
+        /// </summary>
         public MethodInfo Method { get; private set; }
 
+        /// <summary>
+        /// Represents the result of the test execution
+        /// </summary>
         public ExecutionResult ExecutionResult { get; private set; }
 
+        /// <summary>
+        /// Executes test method
+        /// </summary>
+        /// <param name="instance">Test class instance on which to execute method</param>
         public override void Execute(object instance)
         {
             if (ExecutionResult != null && ExecutionResult.Status != ExecutionStatus.Executing)

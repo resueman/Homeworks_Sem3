@@ -7,8 +7,16 @@ using System.Threading.Tasks;
 
 namespace MyNUnit
 {
+    /// <summary>
+    /// Represents custom MyNUnit, that allows to create tests
+    /// </summary>
     public static class MyNUnit
     {
+        /// <summary>
+        /// Runs tests
+        /// </summary>
+        /// <param name="path">path to the directory with assembly containing tests</param>
+        /// <returns>List of tests classes that contains info about tests and their execution results</returns>
         public static async Task<List<MyNUnitTestsClass>> Run(string path)
         {
             var tasks = new List<Task>();
@@ -29,6 +37,10 @@ namespace MyNUnit
             return result.Keys.ToList();
         }
 
+        /// <summary>
+        /// Prints result of test execution on console 
+        /// </summary>
+        /// <param name="testTypes">Classes that contains tests</param>
         public static void PrintResult(List<MyNUnitTestsClass> testTypes)
         {
             var i = 1;
