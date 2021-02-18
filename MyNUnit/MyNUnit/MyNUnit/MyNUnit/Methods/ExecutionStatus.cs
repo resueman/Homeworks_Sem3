@@ -1,6 +1,6 @@
 ﻿namespace MyNUnit
 {
-    public enum TestExecutionStatus
+    public enum ExecutionStatus
     {
         Executing = 0,
         Success = 1,

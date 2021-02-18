@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyNUnit
 {
-    class MyNUnitTestsClass
+    public class MyNUnitTestsClass
     {
         public MyNUnitTestsClass(Type type)
         {

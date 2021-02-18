@@ -9,16 +9,16 @@ namespace MyNUnit
         public StaticFixtureMethod(MethodInfo method)
         {
             var errorMessage = !method.IsStatic
-                ? "Static fixture method must be static, not instance"
+                ? Messages.StaticFixtureMethodMustBeStatic
                 : method.IsPrivate
-                    ? "Static fixture method must be public or internal"
+                    ? Messages.StaticFixtureMethodMustBePublicOrInternal
                     : method.ReturnType != typeof(void)
-                        ? "Static fixture method must have void return type"
+                        ? Messages.StaticFixtureMethodMustBeVoid
                         : method.GetParameters().Length > 0
-                            ? "Static fixture method must have no parameters"
-                            : "";
+                            ? Messages.StaticFixtureMethodMustHaveNoParameters
+                            : Messages.Empty;
 
-            if (!string.IsNullOrEmpty(errorMessage))
+            if (errorMessage != Messages.Empty)
             {
                 throw new IncorrectSignatureOfMyNUnitMethodException(errorMessage);
             }

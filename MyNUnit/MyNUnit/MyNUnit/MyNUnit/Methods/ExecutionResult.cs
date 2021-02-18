@@ -2,18 +2,18 @@
 
 namespace MyNUnit
 {
-    public class TestExecutionResult
+    public class ExecutionResult
     {
-        public TestExecutionResult(TestExecutionStatus status, TimeSpan executionTime, 
-            string errorMessage, string stackTrace)
+        public ExecutionResult(ExecutionStatus status, TimeSpan executionTime, 
+            string message, string stackTrace)
         {
             Status = status;
             ExecutionTime = executionTime;
-            Message = errorMessage;
+            Message = string.IsNullOrEmpty(message) ? Messages.Empty : message;
             StackTrace = stackTrace;
         }
 
-        public TestExecutionStatus Status { get; private set; }
+        public ExecutionStatus Status { get; private set; }
 
         public TimeSpan ExecutionTime { get; private set; }
 

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace MyNUnit
 {
-    static class MyNUnit
+    public static class MyNUnit
     {
-        public static async Task Run(string path)
+        public static async Task<List<MyNUnitTestsClass>> Run(string path)
         {
             var tasks = new List<Task>();
             var directoryAssemblies = Directory.EnumerateFiles(path).Where(f => f.EndsWith(".dll") || f.EndsWith(".exe")).ToList();
@@ -25,6 +25,8 @@ namespace MyNUnit
             }            
             await Task.WhenAll(result.Values);
             PrintResult(result.Keys.ToList());
+
+            return result.Keys.ToList();
         }
 
         public static void PrintResult(List<MyNUnitTestsClass> testTypes)
@@ -33,9 +35,11 @@ namespace MyNUnit
             foreach (var testType in testTypes)
             {
                 var j = 1;
+                Console.WriteLine($"Тестовый класс {i}. {testType.TestClassType.Name}");
+                Console.WriteLine();
                 foreach (var test in testType.TestMethods)
                 {
-                    Console.WriteLine($"{i}.{j} {test.Method.Name}");
+                    Console.WriteLine($"{j}. {test.Method.Name}");
                     Console.WriteLine($"Результат выполнения теста: {test.ExecutionResult.Status}");
                     Console.WriteLine($"Время выполнения теста {test.ExecutionResult.ExecutionTime.TotalMilliseconds}");
                     if (test.ExecutionResult.Message != "")

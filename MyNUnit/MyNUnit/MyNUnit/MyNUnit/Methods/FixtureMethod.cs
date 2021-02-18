@@ -9,16 +9,16 @@ namespace MyNUnit
         public FixtureMethod(MethodInfo method)
         {
             var errorMessage = method.IsStatic
-                ? "Fixture methods, maked with Before and After attributes, must be instance, not static"
+                ? Messages.FixtureMethodMustBeInstance
                 : method.IsPrivate
-                    ? "Fixture methods, maked with Before and After attributes, must be public or internal"
+                    ? Messages.FixtureMethodMustBePublicOrInternal
                     : method.ReturnType != typeof(void)
-                        ? "Fixture methods, maked with Before and After attributes, must have void return type"
+                        ? Messages.FixtureMethodMustBeVoid
                         : method.GetParameters().Length > 0
-                            ? "Fixture methods, maked with Before and After attributes, must have no parameters"
-                            : "";
+                            ? Messages.FixtureMethodMustHaveNoParameters
+                            : Messages.Empty;
 
-            if (!string.IsNullOrEmpty(errorMessage))
+            if (errorMessage != Messages.Empty)
             {
                 throw new IncorrectSignatureOfMyNUnitMethodException(errorMessage);
             }

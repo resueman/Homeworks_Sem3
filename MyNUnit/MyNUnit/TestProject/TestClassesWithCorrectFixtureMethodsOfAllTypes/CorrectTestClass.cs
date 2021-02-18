@@ -8,25 +8,25 @@ namespace TestProject
         [BeforeClass]
         public static void BeforeClass()
         {
-
+            
         }
 
         [AfterClass]
         public static void AfterClass()
         {
-
+            
         }
 
         [Before]
         public void BeforeTest()
         {
-
+            
         }
 
         [After]
         public void AfterTest()
         {
-
+            
         }
 
         [Test]
@@ -36,15 +36,15 @@ namespace TestProject
         }
 
         [Test(Expected = typeof(ArgumentNullException))]
-        public void FailedTestWithException()
+        public void TestThrowsNotTheSameExceptionAsExpected()
         {
             throw new AccessViolationException();
         }
 
-        [Test(Expected = typeof(ArgumentNullException))]
-        public void SuccessTestWithException()
+        [Test(Expected = typeof(Exception))]
+        public void TestThrowsExpectedException()
         {
-            throw new ArgumentNullException();
+            throw new Exception();
         }
 
         [Test(Ignore = "Postponed for better times...")]
@@ -54,9 +54,15 @@ namespace TestProject
         }
 
         [Test(Ignore = "Postponed for better times...", Expected = typeof(AggregateException))]
-        public void IgnoredTestWithArgument()
+        public void IgnoredTestWithExpectedExceptionArgument()
         {
-            throw new AggregateException();
+            throw new AccessViolationException();
+        }
+
+        [Test(Expected = typeof(Exception))]
+        public void TestNotThrowingExceptionAsExpected()
+        {
+
         }
     }
 }

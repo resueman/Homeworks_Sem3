@@ -13,28 +13,28 @@ namespace MyNUnit
             var message = !string.IsNullOrEmpty(errorMessage)
                 ? errorMessage
                 : !method.IsPublic
-                    ? "Test method must be public"
+                    ? Messages.TestMustBePublic
                     : method.IsStatic
-                        ? "Test method must be instance"
+                        ? Messages.TestMustBeInstance
                         : method.ReturnType != typeof(void)
-                            ? "Test method must have void return type"
+                            ? Messages.TestMustBeVoid
                                 : method.GetParameters().Length > 0
-                                    ? "Test must have no parameters"
-                                    : "";
+                                    ? Messages.TestMustHaveNoParameters
+                                    : Messages.Empty;
 
-            if (message != "")
+            if (message != Messages.Empty)
             {
-                ExecutionResult = new TestExecutionResult(TestExecutionStatus.Failed, TimeSpan.Zero, message, null);
+                ExecutionResult = new ExecutionResult(ExecutionStatus.Failed, TimeSpan.Zero, message, null);
             }
         }
 
         public MethodInfo Method { get; private set; }
 
-        public TestExecutionResult ExecutionResult { get; private set; }
+        public ExecutionResult ExecutionResult { get; private set; }
 
         public override void Execute(object instance)
         {
-            if (ExecutionResult != null && ExecutionResult.Status != TestExecutionStatus.Executing)
+            if (ExecutionResult != null && ExecutionResult.Status != ExecutionStatus.Executing)
             {
                 return;
             }
@@ -43,7 +43,7 @@ namespace MyNUnit
             var expectedExceptionType = attribute.Expected;
             if (!string.IsNullOrEmpty(attribute.Ignore))
             {
-                ExecutionResult = new TestExecutionResult(TestExecutionStatus.Ignored, TimeSpan.Zero, attribute.Ignore, null);
+                ExecutionResult = new ExecutionResult(ExecutionStatus.Ignored, TimeSpan.Zero, attribute.Ignore, null);
                 return;
             }
 
@@ -53,7 +53,10 @@ namespace MyNUnit
                 stopWatch.Start();
                 Method.Invoke(instance, null);
                 stopWatch.Stop();
-                ExecutionResult = new TestExecutionResult(TestExecutionStatus.Success, stopWatch.Elapsed, "", null);
+                ExecutionResult = expectedExceptionType == default
+                    ? new ExecutionResult(ExecutionStatus.Success, stopWatch.Elapsed, Messages.Empty, null)
+                    : new ExecutionResult(ExecutionStatus.Failed, stopWatch.Elapsed, $"Expected {expectedExceptionType.Name} to be thrown", null);
+                
             }
             catch (Exception e)
             {
@@ -61,9 +64,9 @@ namespace MyNUnit
                 var actualExceptionType = e.GetBaseException().GetType();
                 var stackTrace = e.ToString();
                 ExecutionResult = actualExceptionType == expectedExceptionType
-                    ? new TestExecutionResult(TestExecutionStatus.Success, stopWatch.Elapsed, "", null)
-                    : new TestExecutionResult(TestExecutionStatus.Failed, stopWatch.Elapsed,
-                        $"Expected exception was {expectedExceptionType.Name}, but was {actualExceptionType}", stackTrace);
+                    ? new ExecutionResult(ExecutionStatus.Success, stopWatch.Elapsed, e.GetBaseException().Message, null)
+                    : new ExecutionResult(ExecutionStatus.Failed, stopWatch.Elapsed,
+                        $"Expected exception was {expectedExceptionType.Name}, but was {actualExceptionType.Name}", stackTrace);
             }
         }
     }

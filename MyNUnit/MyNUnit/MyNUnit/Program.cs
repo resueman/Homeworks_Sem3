@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace MyNUnit
 {
@@ -6,7 +7,8 @@ namespace MyNUnit
     {
         public static async Task Main()
         {
-            // await MyNUnit.Run(@"C:\Users\User\Desktop\Homeworks_Sem3\MyNUnit\MyNUnit\TestProject\bin\Debug\netcoreapp3.1");
-        }
+            //var path = Console.ReadLine();
+            //await MyNUnit.Run(path);
+            await MyNUnit.Run(@"C:\Users\User\Desktop\Homeworks_Sem3\MyNUnit\MyNUnit\TestProject\bin\Debug\netcoreapp3.1");        }
     }
 }
