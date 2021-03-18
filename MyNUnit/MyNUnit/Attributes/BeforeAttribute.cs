@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MyNUnit
+namespace Attributes
 {
     /// <summary>
     /// Identifies the method that is executed before each test method in the class

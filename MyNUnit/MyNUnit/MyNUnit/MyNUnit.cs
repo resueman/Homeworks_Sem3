@@ -23,8 +23,15 @@ namespace MyNUnit
             var directoryAssemblies = Directory.EnumerateFiles(path).Where(f => f.EndsWith(".dll") || f.EndsWith(".exe")).ToList();
             var currentAssemblyName = Assembly.GetExecutingAssembly().GetName().Name;
             directoryAssemblies.RemoveAll(a => a.EndsWith(currentAssemblyName + ".dll") || a.EndsWith(currentAssemblyName + ".exe"));
+            directoryAssemblies.RemoveAll(a => a == $"{path}\\Attributes.dll");
 
-            var types = directoryAssemblies.Select(Assembly.LoadFrom).SelectMany(a => a.ExportedTypes).Where(t => t.IsClass).ToList();
+            var types = directoryAssemblies
+                .Select(Assembly.LoadFrom)
+                .AsParallel()
+                .SelectMany(a => a.ExportedTypes)
+                .Where(t => t.IsClass)
+                .ToList();
+
             var result = new Dictionary<MyNUnitTestsClass, Task>();
             foreach (var type in types)
             {
@@ -55,7 +62,7 @@ namespace MyNUnit
                     Console.WriteLine($"Результат выполнения теста: {test.ExecutionResult.Status}");
                     Console.WriteLine($"Время выполнения теста {test.ExecutionResult.ExecutionTime.TotalMilliseconds}");
                     if (test.ExecutionResult.Message != "")
-                        Console.WriteLine($"Причина провала теста: {test.ExecutionResult.Message}");
+                        Console.WriteLine($"Причина провала теста: {test.ExecutionResult.Message.Replace("\r\n", "")}");
                     Console.WriteLine();
                     ++j;
                 }

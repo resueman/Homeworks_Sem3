@@ -1,17 +1,21 @@
 ﻿using System;
 
-namespace MyNUnit
+namespace Attributes
 {
     /// <summary>
     /// Identifies test method
-    /// It is possible to ignore the test method
-    /// it is possible to pass the type of the expected exception
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
     public class TestAttribute : Attribute
     {
+        /// <summary>
+        /// Identifies the type of expected exception
+        /// </summary>
         public Type Expected { get; set; }
 
+        /// <summary>
+        /// Identifies the reason for ignoring the test
+        /// </summary>
         public string Ignore { get; set; }
     }
 }

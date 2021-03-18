@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using MyNUnit;
 
-namespace MyNUnit
+namespace Methods
 {
     /// <summary>
     /// Identifies results of test execution
@@ -19,7 +21,7 @@ namespace MyNUnit
         {
             Status = status;
             ExecutionTime = executionTime;
-            Message = string.IsNullOrEmpty(message) ? Messages.Empty : message;
+            Message = message;
             StackTrace = stackTrace;
         }
 

@@ -18,6 +18,5 @@
         public const string StaticFixtureMethodMustBeStatic = "Static fixture method must be static, not instance";
         public const string StaticFixtureMethodMustBeVoid = "Static fixture method must have void return type";
         public const string StaticFixtureMethodMustHaveNoParameters = "Static fixture method must have no parameters";
-
     }
 }

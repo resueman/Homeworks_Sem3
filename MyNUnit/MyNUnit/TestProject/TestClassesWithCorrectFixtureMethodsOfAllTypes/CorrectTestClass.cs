@@ -1,4 +1,4 @@
-﻿using MyNUnit;
+﻿using Attributes;
 using System;
 
 namespace TestProject

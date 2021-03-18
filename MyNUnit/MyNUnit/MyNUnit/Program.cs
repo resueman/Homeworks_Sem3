@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace MyNUnit
 {
@@ -8,11 +7,12 @@ namespace MyNUnit
     /// </summary>
     class Program
     {
-        public static async Task Main()
+        public static async Task Main(string[] args)
         {
-            Console.WriteLine("Введите путь: ");
-            var path = Console.ReadLine();
-            await MyNUnit.Run(path);
+            foreach (var path in args)
+            {
+                await MyNUnit.Run(path);
+            }
         }
     }
 }

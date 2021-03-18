@@ -1,13 +1,16 @@
-﻿using System;
+﻿using Attributes;
+using MyNUnit;
+using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text;
 
-namespace MyNUnit
+namespace Methods
 {
     /// <summary>
     /// Identifies method marked with TestAttribute
     /// </summary>
-    public class TestMethod : MyNUnitMethod
+    public class TestMethod : IMyNUnitMethod
     {
         /// <summary>
         /// Creates instance of TestMethod class
@@ -18,22 +21,30 @@ namespace MyNUnit
         public TestMethod(MethodInfo method, string errorMessage)
         {
             Method = method;
-
-            var message = !string.IsNullOrEmpty(errorMessage)
-                ? errorMessage
-                : !method.IsPublic
-                    ? Messages.TestMustBePublic
-                    : method.IsStatic
-                        ? Messages.TestMustBeInstance
-                        : method.ReturnType != typeof(void)
-                            ? Messages.TestMustBeVoid
-                                : method.GetParameters().Length > 0
-                                    ? Messages.TestMustHaveNoParameters
-                                    : Messages.Empty;
-
-            if (message != Messages.Empty)
+            var errors = new StringBuilder();
+            if (!string.IsNullOrEmpty(errorMessage))
             {
-                ExecutionResult = new ExecutionResult(ExecutionStatus.Failed, TimeSpan.Zero, message, null);
+                errors.AppendLine(errorMessage);
+            }
+            if (!method.IsPublic)
+            {
+                errors.AppendLine(Messages.TestMustBePublic);
+            }
+            if (method.IsStatic)
+            {
+                errors.AppendLine(Messages.TestMustBeInstance);
+            }
+            if (method.ReturnType != typeof(void))
+            {
+                errors.AppendLine(Messages.TestMustBeVoid);
+            }
+            if (method.GetParameters().Length > 0)
+            {
+                errors.AppendLine(Messages.TestMustHaveNoParameters);
+            }
+            if (errors.Length != 0)
+            {
+                ExecutionResult = new ExecutionResult(ExecutionStatus.Failed, TimeSpan.Zero, errors.ToString(), null);
             }
         }
 
@@ -51,7 +62,7 @@ namespace MyNUnit
         /// Executes test method
         /// </summary>
         /// <param name="instance">Test class instance on which to execute method</param>
-        public override void Execute(object instance)
+        public void Execute(object instance)
         {
             if (ExecutionResult != null && ExecutionResult.Status != ExecutionStatus.Executing)
             {

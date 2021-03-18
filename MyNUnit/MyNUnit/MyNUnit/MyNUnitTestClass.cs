@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Attributes;
+using Methods;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -61,11 +63,11 @@ namespace MyNUnit
         /// <returns>Task representing tests running</returns>
         public async Task RunTests()
         {
-            var testClassInstance = Activator.CreateInstance(TestClassType);
             await DiscoverAllMyNUnitMethods();
             BeforeClassMethods.ForEach(m => m.Execute(null));
             Parallel.ForEach(TestMethods, m =>
             {
+                var testClassInstance = Activator.CreateInstance(TestClassType);
                 Parallel.ForEach(BeforeMethods, bm => bm.Execute(testClassInstance));
                 m.Execute(testClassInstance);
                 Parallel.ForEach(AfterMethods, am => am.Execute(testClassInstance));
@@ -76,7 +78,6 @@ namespace MyNUnit
         /// <summary>
         /// Discovers MyNUnit methods that was marked with MyNUnit attributes
         /// </summary>
-        /// <returns></returns>
         private async Task DiscoverAllMyNUnitMethods()
         {
             var tasks = new List<Task>()

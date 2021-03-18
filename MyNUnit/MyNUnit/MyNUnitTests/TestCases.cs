@@ -1,4 +1,6 @@
-﻿namespace MyNUnitTests
+﻿using Methods;
+
+namespace MyNUnitTests
 {
     /// <summary>
     /// Test cases for MyNUnit testing
@@ -9,23 +11,23 @@
         {
             new object[]
             {
-                "ClassWithCorrectAndIncorrectTestMethods", "PrivateTest", MyNUnit.ExecutionStatus.Failed, MyNUnit.Messages.TestMustBePublic
+                "ClassWithCorrectAndIncorrectTestMethods", "PrivateTest", ExecutionStatus.Failed, MyNUnit.Messages.TestMustBePublic
             },
             new object[]
             {
-                "ClassWithCorrectAndIncorrectTestMethods", "InternalTest", MyNUnit.ExecutionStatus.Failed, MyNUnit.Messages.TestMustBePublic
+                "ClassWithCorrectAndIncorrectTestMethods", "InternalTest", ExecutionStatus.Failed, MyNUnit.Messages.TestMustBePublic
             },
             new object[]
             {
-                "ClassWithCorrectAndIncorrectTestMethods", "ParameterizedTest", MyNUnit.ExecutionStatus.Failed, MyNUnit.Messages.TestMustHaveNoParameters
+                "ClassWithCorrectAndIncorrectTestMethods", "ParameterizedTest", ExecutionStatus.Failed, MyNUnit.Messages.TestMustHaveNoParameters
             },
             new object[]
             {
-                "ClassWithCorrectAndIncorrectTestMethods", "StaticTest", MyNUnit.ExecutionStatus.Failed, MyNUnit.Messages.TestMustBeInstance
+                "ClassWithCorrectAndIncorrectTestMethods", "StaticTest", ExecutionStatus.Failed, MyNUnit.Messages.TestMustBeInstance
             },
             new object[]
             {
-                "ClassWithCorrectAndIncorrectTestMethods", "NonVoidTest", MyNUnit.ExecutionStatus.Failed, MyNUnit.Messages.TestMustBeVoid
+                "ClassWithCorrectAndIncorrectTestMethods", "NonVoidTest", ExecutionStatus.Failed, MyNUnit.Messages.TestMustBeVoid
             }
         };
 
@@ -33,15 +35,15 @@
         {
             new object[]
             {
-                "ClassWithCorrectAndIncorrectTestMethods", "TestWithCorrectSignature", MyNUnit.ExecutionStatus.Success, MyNUnit.Messages.Empty
+                "ClassWithCorrectAndIncorrectTestMethods", "TestWithCorrectSignature", ExecutionStatus.Success, MyNUnit.Messages.Empty
             },
             new object[]
             {
-                "CorrectTestClass", "TestThrowsExpectedException", MyNUnit.ExecutionStatus.Success, "Exception of type 'System.Exception' was thrown."
+                "CorrectTestClass", "TestThrowsExpectedException", ExecutionStatus.Success, "Exception of type 'System.Exception' was thrown."
             },
             new object[]
             {
-                "CorrectTestClass", "SuccessTestWithoutAnyArguments", MyNUnit.ExecutionStatus.Success, MyNUnit.Messages.Empty
+                "CorrectTestClass", "SuccessTestWithoutAnyArguments", ExecutionStatus.Success, MyNUnit.Messages.Empty
             }
         };
 
@@ -49,11 +51,11 @@
         {
             new object[]
             {
-                "CorrectTestClass", "TestThrowsNotTheSameExceptionAsExpected", MyNUnit.ExecutionStatus.Failed, "Expected exception was ArgumentNullException, but was AccessViolationException"
+                "CorrectTestClass", "TestThrowsNotTheSameExceptionAsExpected", ExecutionStatus.Failed, "Expected exception was ArgumentNullException, but was AccessViolationException"
             },
             new object[]
             {
-                "CorrectTestClass", "TestNotThrowingExceptionAsExpected", MyNUnit.ExecutionStatus.Failed, "Expected Exception to be thrown"
+                "CorrectTestClass", "TestNotThrowingExceptionAsExpected", ExecutionStatus.Failed, "Expected Exception to be thrown"
             }
         };
 
@@ -61,11 +63,11 @@
         {
             new object[]
             {
-                "CorrectTestClass", "IgnoredTestWithoutAnyArgument", MyNUnit.ExecutionStatus.Ignored, "Postponed for better times..."
+                "CorrectTestClass", "IgnoredTestWithoutAnyArgument", ExecutionStatus.Ignored, "Postponed for better times..."
             },
             new object[]
             {
-                "CorrectTestClass", "IgnoredTestWithExpectedExceptionArgument", MyNUnit.ExecutionStatus.Ignored, "Postponed for better times..."
+                "CorrectTestClass", "IgnoredTestWithExpectedExceptionArgument", ExecutionStatus.Ignored, "Postponed for better times..."
             }
         };
 
@@ -73,19 +75,19 @@
         {
             new object[]
             {
-                "ClassWithNonVoidFixtureMethod", "TestFromClassWithNonVoidFixtureMethod", MyNUnit.ExecutionStatus.Failed, MyNUnit.Messages.FixtureMethodMustBeVoid
+                "ClassWithNonVoidFixtureMethod", "TestFromClassWithNonVoidFixtureMethod", ExecutionStatus.Failed, MyNUnit.Messages.FixtureMethodMustBeVoid
             },
             new object[]
             {
-                "ClassWithParameterizedFixtureMethod", "TestFromClassWithParameterizedFixtureMethod", MyNUnit.ExecutionStatus.Failed, MyNUnit.Messages.FixtureMethodMustHaveNoParameters
+                "ClassWithParameterizedFixtureMethod", "TestFromClassWithParameterizedFixtureMethod", ExecutionStatus.Failed, MyNUnit.Messages.FixtureMethodMustHaveNoParameters
             },
             new object[]
             {
-                "ClassWithPrivateFixtureMethod", "TestFromClassWithPrivateFixtureMethod", MyNUnit.ExecutionStatus.Failed, MyNUnit.Messages.FixtureMethodMustBePublicOrInternal
+                "ClassWithPrivateFixtureMethod", "TestFromClassWithPrivateFixtureMethod", ExecutionStatus.Failed, MyNUnit.Messages.FixtureMethodMustBePublicOrInternal
             },
             new object[]
             {
-                "ClassWithStaticFixtureMethod", "TestFromClassWithStaticFixtureMethod", MyNUnit.ExecutionStatus.Failed, MyNUnit.Messages.FixtureMethodMustBeInstance
+                "ClassWithStaticFixtureMethod", "TestFromClassWithStaticFixtureMethod", ExecutionStatus.Failed, MyNUnit.Messages.FixtureMethodMustBeInstance
             }
         };
 
@@ -93,19 +95,19 @@
         {
             new object[]
             {
-                "ClassWithNonVoidStaticFixtureMethod", "TestFromClassWithNonVoidStaticFixtureMethod", MyNUnit.ExecutionStatus.Failed, MyNUnit.Messages.StaticFixtureMethodMustBeVoid
+                "ClassWithNonVoidStaticFixtureMethod", "TestFromClassWithNonVoidStaticFixtureMethod", ExecutionStatus.Failed, MyNUnit.Messages.StaticFixtureMethodMustBeVoid
             },
             new object[]
             {
-                "ClassWithParameterizedStaticFixtureMethod", "TestFromClassWithParameterizedStaticFixtureMethod", MyNUnit.ExecutionStatus.Failed, MyNUnit.Messages.StaticFixtureMethodMustHaveNoParameters
+                "ClassWithParameterizedStaticFixtureMethod", "TestFromClassWithParameterizedStaticFixtureMethod", ExecutionStatus.Failed, MyNUnit.Messages.StaticFixtureMethodMustHaveNoParameters
             },
             new object[]
             {
-                "ClassWithPrivateStaticFixtureMethod", "TestFromClassWithPrivateStaticFixtureMethod", MyNUnit.ExecutionStatus.Failed, MyNUnit.Messages.StaticFixtureMethodMustBePublicOrInternal
+                "ClassWithPrivateStaticFixtureMethod", "TestFromClassWithPrivateStaticFixtureMethod", ExecutionStatus.Failed, MyNUnit.Messages.StaticFixtureMethodMustBePublicOrInternal
             },
             new object[]
             {
-                "ClassWithNonStaticStaticFixtureMethods", "TestFromClassWithNonStaticStaticFixtureMethods", MyNUnit.ExecutionStatus.Failed, MyNUnit.Messages.StaticFixtureMethodMustBeStatic
+                "ClassWithNonStaticStaticFixtureMethods", "TestFromClassWithNonStaticStaticFixtureMethods", ExecutionStatus.Failed, MyNUnit.Messages.StaticFixtureMethodMustBeStatic
             }
         };
 
@@ -113,11 +115,11 @@
         {
             new object[]
             {
-                "ClassForTestingStaticFixtureMethodsCorrectSignatures", "TestForBeforeClassTest", MyNUnit.ExecutionStatus.Success, "3"
+                "ClassForTestingStaticFixtureMethodsCorrectSignatures", "TestForBeforeClassTest", ExecutionStatus.Success, "3"
             },
             new object[]
             {
-                "ClassForTestingSeveralStaticFixtureMethodsWork", "TestForBeforeClassTest", MyNUnit.ExecutionStatus.Success, "3"
+                "ClassForTestingSeveralStaticFixtureMethodsWork", "TestForBeforeClassTest", ExecutionStatus.Success, "3"
             }
         };
 
@@ -125,11 +127,11 @@
         {
             new object[]
             {
-                "ClassForTestingFixtureMethodsCorrectSignatures", "TestForBeforeTest", MyNUnit.ExecutionStatus.Success, "3"
+                "ClassForTestingFixtureMethodsCorrectSignatures", "TestForBeforeTest", ExecutionStatus.Success, "3"
             },
             new object[]
             {
-                "ClassForTestingSeveralFixtureMetodsWork", "TestForBeforeTest", MyNUnit.ExecutionStatus.Success, "3"
+                "ClassForTestingSeveralFixtureMetodsWork", "TestForBeforeTest", ExecutionStatus.Success, "3"
             }
         };
     }

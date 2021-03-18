@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MyNUnit
+namespace Attributes
 {
     /// <summary>
     /// Identifies the method that is executed after the completion of each test method
