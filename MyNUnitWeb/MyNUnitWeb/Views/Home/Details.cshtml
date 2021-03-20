@@ -1,0 +1,32 @@
+﻿@model Test
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Details</title>
+</head>
+<body>
+    <h2>Assemblies:</h2>
+    <div>
+        <div>
+            <p>Name:</p>
+            <p>@Model.Name</p>
+        </div>
+        <div>
+            <p>Status:</p>
+            <p>@Model.ExecutionStatus</p>
+        </div>
+        <div>
+            <p>Time:</p>
+            <p>@Model.ExecutionTime</p>
+        </div>
+        <div>
+            <p>Message:</p>
+            <p>@Model.Message</p>
+        </div>
+    </div>
+</body>
+</html>
