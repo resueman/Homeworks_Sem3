@@ -32,6 +32,11 @@ namespace MyNUnitWeb.Controllers
             return View(_repository.Assemblies.Include(a => a.Tests).ToList());
         }
 
+        public IActionResult Details(int id)
+        {
+            return View(_repository.Assemblies.Include(a => a.Tests).First(a => a.Id == id));
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
@@ -62,9 +67,10 @@ namespace MyNUnitWeb.Controllers
                     testedAssembly = (await _repository.AddAsync(new Assembly { Name = name })).Entity;
                     await _repository.SaveChangesAsync();
                 }
+                
                 _repository.RemoveRange(testedAssembly.Tests);
-                testedAssembly.Tests.Clear();
                 await _repository.SaveChangesAsync();
+                
                 var testMethods = await MyNUnit.MyNUnit.Run(assemblyName);
                 foreach (var testMethod in testMethods)
                 {

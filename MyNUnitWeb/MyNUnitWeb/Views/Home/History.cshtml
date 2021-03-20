@@ -28,7 +28,8 @@
                 <td>@a.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Success)</td>
                 <td>@a.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Failed)</td>
                 <td>@a.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Ignored)</td>
-                <td><a asp-page="/Details" asp-route-id="@a.Id">Details</a></td>
+                @*<td><a asp-page="/Details" asp-route-id="@a.Id">Details</a></td>*@
+                <td><a asp-area="" asp-controller="Home" asp-action="Details" asp-route-id="@a.Id">Details</a></td>
             </tr>
             }
         </tbody>
