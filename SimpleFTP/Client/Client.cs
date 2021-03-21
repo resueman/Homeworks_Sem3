@@ -44,6 +44,7 @@ namespace SimpleFTP
                 for (var i = 2; i < splitted.Length; ++i)
                 {
                     directoryContent.Add((splitted[i - 1], bool.Parse(splitted[i])));
+                    ++i;
                 }
 
                 return (size, directoryContent.Count > 0 ? directoryContent : null);

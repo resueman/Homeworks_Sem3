@@ -33,7 +33,8 @@ namespace SimpleFTP
                     while (true)
                     {
                         var request = await streamReader.ReadLineAsync();
-                        await ProcessRequest(request, streamWriter);
+                        if (request != null)
+                            await ProcessRequest(request, streamWriter);
                     }
                 });
             }
@@ -60,6 +61,7 @@ namespace SimpleFTP
                     if (size == -1)
                     {
                         await streamWriter.WriteLineAsync(size.ToString());
+                        break;
                     }
                     var listResponse = $"{size} ";
                     foreach (var (name, isDirectory) in list)
