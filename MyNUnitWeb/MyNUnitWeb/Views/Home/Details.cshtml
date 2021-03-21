@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.css" />
 </head>
 <body>
-    <h2>Details</h2>
+    <h2>Тесты сборки @Model.Name</h2>
     <table class="table table-striped table-bordered table-sm">
         <thead>
             <tr>
@@ -25,11 +25,16 @@
             @{var i = 1;}
             @foreach (var test in Model.Tests)
             {
+                var src = test.ExecutionStatus == Methods.ExecutionStatus.Success
+                    ? "/success.ico"
+                    : test.ExecutionStatus == Methods.ExecutionStatus.Failed
+                        ? "/fail.ico"
+                        : "/ignored.png";
                 <tr>
                     <td>@i</td>
                     <td>@test.Name</td>
                     <td>@test.ExecutionTime</td>
-                    <td>@test.ExecutionStatus</td>
+                    <td><img width="15" src="@src"/></td>
                     <td>@test.Message</td>
                 </tr>                
                 ++i;                      

@@ -5,11 +5,11 @@
 }
 
 <div>
-    <h3>Выберите файл для загрузки</h3>
+    <h3>Choose assembly to test:</h3>
     <div class="col">
         <div class="row">
             <form asp-action="LoadAssemblies" asp-controller="Home" method="post" enctype="multipart/form-data">
-                <input type="file" name="assembly" />
+                <input type="file" name="assembly" accept=".dll"/>
                 <input type="submit" value="Загрузить" />
             </form>
         </div>
