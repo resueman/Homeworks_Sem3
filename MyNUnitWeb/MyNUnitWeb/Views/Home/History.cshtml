@@ -11,26 +11,26 @@
 <body>
     <h1>TUFUVB YHKBGCC YGLIGV655434576 FVCFTXDCY  TFGHFCVH</h1>
     <h2>Assemblies:</h2>
-    <table>
+    <table class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Successed</th>
                 <th>Failed</th>
                 <th>Ignored</th>
+                <th>Details</th>
             </tr>
         </thead>
         <tbody>
             @foreach (MyNUnitWeb.Models.Assembly a in Model)
             {
-            <tr>
-                <td>@a.Name</td>
-                <td>@a.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Success)</td>
-                <td>@a.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Failed)</td>
-                <td>@a.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Ignored)</td>
-                @*<td><a asp-page="/Details" asp-route-id="@a.Id">Details</a></td>*@
-                <td><a asp-area="" asp-controller="Home" asp-action="Details" asp-route-id="@a.Id">Details</a></td>
-            </tr>
+                <tr>
+                    <td>@a.Name</td>
+                    <td>@a.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Success)</td>
+                    <td>@a.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Failed)</td>
+                    <td>@a.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Ignored)</td>
+                    <td><a href="~/History/Details/@a.Id">Details</a></td>
+                </tr>
             }
         </tbody>
     </table>

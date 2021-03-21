@@ -7,12 +7,14 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>Details</title>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.css" />
 </head>
 <body>
     <h2>Details</h2>
-    <table>
+    <table class="table table-striped table-bordered table-sm">
         <thead>
             <tr>
+                <th>#</th>
                 <th>Name</th>
                 <th>ExecutionTime</th>
                 <th>Status</th>
@@ -20,14 +22,17 @@
             </tr>
         </thead>
         <tbody>
+            @{var i = 1;}
             @foreach (var test in Model.Tests)
             {
                 <tr>
+                    <td>@i</td>
                     <td>@test.Name</td>
                     <td>@test.ExecutionTime</td>
                     <td>@test.ExecutionStatus</td>
                     <td>@test.Message</td>
-                </tr>
+                </tr>                
+                ++i;                      
             }
         </tbody>
     </table>

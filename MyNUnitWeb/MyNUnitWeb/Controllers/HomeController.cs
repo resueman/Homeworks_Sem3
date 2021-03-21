@@ -14,7 +14,7 @@ namespace MyNUnitWeb.Controllers
     public class HomeController : Controller
     {
         private readonly IWebHostEnvironment _environment;
-        private Repository _repository;
+        private readonly Repository _repository;
 
         public HomeController(IWebHostEnvironment environment, Repository repository)
         {
@@ -32,7 +32,8 @@ namespace MyNUnitWeb.Controllers
             return View(_repository.Assemblies.Include(a => a.Tests).ToList());
         }
 
-        public IActionResult Details(int id)
+        [HttpGet("History/Details/{id}")]
+        public IActionResult Details(int? id)
         {
             return View(_repository.Assemblies.Include(a => a.Tests).First(a => a.Id == id));
         }
@@ -46,6 +47,10 @@ namespace MyNUnitWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> LoadAssembliesAsync(IFormFile assembly)
         {
+            if (!Directory.Exists($"{_environment.WebRootPath}/Files/"))
+            {
+                Directory.CreateDirectory($"{_environment.WebRootPath}/Files/");
+            }
             if (assembly != null)
             {
                 using var fileStream = new FileStream($"{_environment.WebRootPath}/Files/{assembly.FileName}", FileMode.Create);

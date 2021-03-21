@@ -4,13 +4,19 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
+<div>
     <h3>Выберите файл для загрузки</h3>
-    <form asp-action="LoadAssemblies" asp-controller="Home" method="post" enctype="multipart/form-data">
-        <input type="file" name="assembly" /><br>
-        <input type="submit" value="Загрузить" />
-    </form>
-    <form asp-action="RunTests" method="post">
-        <input type="submit" value="Начать тестирование" />
-    </form>
+    <div class="col">
+        <div class="row">
+            <form asp-action="LoadAssemblies" asp-controller="Home" method="post" enctype="multipart/form-data">
+                <input type="file" name="assembly" />
+                <input type="submit" value="Загрузить" />
+            </form>
+        </div>
+        <div class="row mt-2">
+            <form asp-action="RunTests" method="post">
+                <input asp-action="RunTests" method="post" type="submit" value="Начать тестирование" />
+            </form>
+        </div>
+    </div>
 </div>
