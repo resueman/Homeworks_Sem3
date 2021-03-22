@@ -13,20 +13,37 @@ namespace SimpleFTP
     public class Server : IDisposable
     {
         private readonly TcpListener listener;
+        private Task mainTask;
 
         public Server(int port = 8888)
         {
             listener = new TcpListener(IPAddress.Any, port);
         }
 
-        public async Task Start()
+        public void Stop()
         {
-            listener.Start();
-            while (true)
+            listener.Stop();
+            mainTask.Wait();
+        }
+
+        public void Start()
+        {
+            mainTask = Task.Run(async () =>
             {
-                var client = await listener.AcceptTcpClientAsync();
-                HandleClient(client);
-            }
+                listener.Start();
+                while (true)
+                {
+                    try
+                    {
+                        var client = await listener.AcceptTcpClientAsync();
+                        HandleClient(client);
+                    }
+                    catch (Exception e) when (e is InvalidOperationException || e is SocketException)
+                    {
+                        return;
+                    }
+                }
+            });
         }
 
         private void HandleClient(TcpClient client)
@@ -43,9 +60,8 @@ namespace SimpleFTP
                         var request = await streamReader.ReadLineAsync();
                         await ProcessRequest(request, streamWriter);
                     }
-                    catch (IOException e) when (e.InnerException is SocketException)
+                    catch (Exception e) when (e is IOException || e is InvalidOperationException)
                     {
-                        client.Dispose();
                         break;
                     }
                 }

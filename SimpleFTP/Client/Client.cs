@@ -49,7 +49,7 @@ namespace SimpleFTP
 
                 return (size, directoryContent.Count > 0 ? directoryContent : null);
             }
-            catch (Exception e) when (e is SocketException || e is IOException && e.InnerException is SocketException)
+            catch (IOException e)
             {
                 throw new ConnectionToServerException(e.Message, e);
             }
@@ -76,7 +76,7 @@ namespace SimpleFTP
 
                 return (long.Parse(size), content);
             }
-            catch (Exception e) when (e is SocketException || e is IOException && e.InnerException is SocketException)
+            catch (Exception e) when (e is IOException || e is SocketException)
             {
                 throw new ConnectionToServerException(e.Message, e);
             }

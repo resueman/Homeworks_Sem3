@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace SimpleFTP
 {
@@ -7,7 +8,12 @@ namespace SimpleFTP
         static async Task Main()
         {
             using var server = new Server();
-            await server.Start();
+            server.Start();
+            var input = Console.ReadKey();
+            while (input.Key != ConsoleKey.Escape)
+            {
+                input = Console.ReadKey();
+            }
         }
     }
 }
