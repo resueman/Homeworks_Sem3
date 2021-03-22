@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace SimpleFTP
 {
+    /// <summary>
+    /// Contains UI and client program's entry point
+    /// </summary>
     class Program
     {
         private static void PrintOptions()
@@ -13,6 +16,9 @@ namespace SimpleFTP
             Console.WriteLine("3 - Exit");
         }
 
+        /// <summary>
+        /// Clients entry point
+        /// </summary>
         static async Task Main()
         {
             PrintOptions();

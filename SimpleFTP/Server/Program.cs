@@ -1,11 +1,16 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 namespace SimpleFTP
 {
+    /// <summary>
+    /// Contains UI and server program's entry point
+    /// </summary>
     class Program
     {
-        static async Task Main()
+        /// <summary>
+        /// Entry point
+        /// </summary>
+        static void Main()
         {
             using var server = new Server();
             server.Start();

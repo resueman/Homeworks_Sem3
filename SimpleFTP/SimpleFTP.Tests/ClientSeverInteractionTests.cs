@@ -1,8 +1,8 @@
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace SimpleFTP.Tests
 {
-    public class Tests
+    class ClientSeverInteractionTests
     {
         [SetUp]
         public void Setup()

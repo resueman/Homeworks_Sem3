@@ -10,22 +10,35 @@ using System.Text;
 
 namespace SimpleFTP
 {
+    /// <summary>
+    /// Implments network server that handles request according to file transport protocol
+    /// </summary>
     public class Server : IDisposable
     {
         private readonly TcpListener listener;
         private Task mainTask;
 
+        /// <summary>
+        /// Creates instance of network server
+        /// </summary>
+        /// <param name="port">Port which will be listened for incoming connections attempts</param>
         public Server(int port = 8888)
         {
             listener = new TcpListener(IPAddress.Any, port);
         }
 
+        /// <summary>
+        /// Stops server
+        /// </summary>
         public void Stop()
         {
             listener.Stop();
             mainTask.Wait();
         }
 
+        /// <summary>
+        /// Starts server for handling requests of clients
+        /// </summary>
         public void Start()
         {
             mainTask = Task.Run(async () =>
@@ -142,6 +155,9 @@ namespace SimpleFTP
             return (content.Length, content);
         }
 
+        /// <summary>
+        /// Releases used resourses
+        /// </summary>
         public void Dispose()
         {
             listener.Stop();

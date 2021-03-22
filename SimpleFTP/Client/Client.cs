@@ -8,6 +8,9 @@ using System.Text.RegularExpressions;
 
 namespace SimpleFTP
 {
+    /// <summary>
+    /// Implements network client that follows file transport protocol 
+    /// </summary>
     public class Client : IDisposable
     {
         private readonly TcpClient client;
@@ -15,6 +18,11 @@ namespace SimpleFTP
         private readonly StreamReader reader;
         private readonly StreamWriter writer;
 
+        /// <summary>
+        /// Creates instance of network client
+        /// </summary>
+        /// <param name="hostname">Hostname</param>
+        /// <param name="port">Port</param>
         public Client(string hostname = "127.0.0.1", int port = 8888)
         {
             try
@@ -28,8 +36,13 @@ namespace SimpleFTP
             {
                 throw new ConnectionToServerException("Connection to server failed", e);
             }
-        } 
+        }
 
+        /// <summary>
+        /// Makes a listing of files and directories in a specified directory on the server
+        /// </summary>
+        /// <param name="pathToDirectory">Path to directory, which content should be listed</param>
+        /// <returns>Content of specified directory according to file transport protocol</returns>
         public async Task<(int size, IEnumerable<(string name, bool isDirectory)> directoryContent)> List(string pathToDirectory)
         {
             try
@@ -55,6 +68,11 @@ namespace SimpleFTP
             }
         }
 
+        /// <summary>
+        /// Returns file content
+        /// </summary>
+        /// <param name="pathToFile">Path to downloading file</param>
+        /// <returns>Size and file content according to file transport protocol</returns>
         public async Task<(long size, byte[] content)> Get(string pathToFile)
         {
             try
@@ -114,6 +132,9 @@ namespace SimpleFTP
             return response;
         }
 
+        /// <summary>
+        /// Releases used resources
+        /// </summary>
         public void Dispose()
         {
             client.Close();
