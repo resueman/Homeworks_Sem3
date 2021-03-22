@@ -17,35 +17,42 @@ namespace SimpleFTP
         {
             PrintOptions();
             using var client = new Client();
-            while (true)
+            try
             {
-                Console.WriteLine("\nPlease, choose option");
-                var option = Console.ReadLine();
-                switch (option)
+                while (true)
                 {
-                    case "1":
-                        Console.Write("Path to directory: ");
-                        var pathToDirectory = Console.ReadLine();
-                        var (sizeOfDirectory, directoryContent) = await client.List(pathToDirectory);
-                        Console.WriteLine($"Number of files and directories in current directory: {sizeOfDirectory}");
-                        foreach (var (name, isDirectory) in directoryContent)
-                        {
-                            Console.WriteLine($"Name: {name}, is directory: {isDirectory}");
-                        }
-                        break;
-                    case "2":
-                        Console.WriteLine("Path to file: ");
-                        var pathToFile = Console.ReadLine();
-                        var (sizeOfFile, fileContent) = await client.Get(pathToFile);
-                        Console.WriteLine($"size: {sizeOfFile}");
-                        Console.WriteLine("File successfully downloaded");
-                        break;
-                    case "3":
-                        return;
-                    default:
-                        Console.WriteLine("No such option, try again");
-                        break;
+                    Console.WriteLine("\nPlease, choose option");
+                    var option = Console.ReadLine();
+                    switch (option)
+                    {
+                        case "1":
+                            Console.Write("Path to directory: ");
+                            var pathToDirectory = Console.ReadLine();
+                            var (sizeOfDirectory, directoryContent) = await client.List(pathToDirectory);
+                            Console.WriteLine($"Number of files and directories in current directory: {sizeOfDirectory}");
+                            foreach (var (name, isDirectory) in directoryContent)
+                            {
+                                Console.WriteLine($"Name: {name}, is directory: {isDirectory}");
+                            }
+                            break;
+                        case "2":
+                            Console.WriteLine("Path to file: ");
+                            var pathToFile = Console.ReadLine();
+                            var (sizeOfFile, fileContent) = await client.Get(pathToFile);
+                            Console.WriteLine($"size: {sizeOfFile}");
+                            Console.WriteLine("File successfully downloaded");
+                            break;
+                        case "3":
+                            return;
+                        default:
+                            Console.WriteLine("No such option, try again");
+                            break;
+                    }
                 }
+            }
+            catch (ConnectionToServerException e)
+            {
+                Console.WriteLine(e.Message);
             }
         }
     }

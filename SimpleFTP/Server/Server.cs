@@ -24,20 +24,32 @@ namespace SimpleFTP
             listener.Start();
             while (true)
             {
-                using var client = await listener.AcceptTcpClientAsync();
-                await Task.Run(async () =>
+                var client = await listener.AcceptTcpClientAsync();
+                HandleClient(client);
+            }
+        }
+
+        private void HandleClient(TcpClient client)
+        {
+            Task.Run(async () =>
+            {
+                using var stream = client.GetStream();
+                using var streamReader = new StreamReader(stream);
+                using var streamWriter = new StreamWriter(stream) { AutoFlush = true };
+                while (true)
                 {
-                    using var stream = client.GetStream();
-                    using var streamReader = new StreamReader(stream);
-                    using var streamWriter = new StreamWriter(stream) { AutoFlush = true };
-                    while (true)
+                    try
                     {
                         var request = await streamReader.ReadLineAsync();
-                        if (request != null)
-                            await ProcessRequest(request, streamWriter);
+                        await ProcessRequest(request, streamWriter);
                     }
-                });
-            }
+                    catch (IOException e) when (e.InnerException is SocketException)
+                    {
+                        client.Dispose();
+                        break;
+                    }
+                }
+            });
         }
 
         private async Task ProcessRequest(string request, StreamWriter streamWriter)
@@ -51,8 +63,6 @@ namespace SimpleFTP
 
             var (command, path) = (int.Parse(match.Groups[1].Value),
                 match.Groups[2].Value);
-
-            path = Path.GetFullPath(path);
 
             switch (command)
             {
@@ -96,7 +106,7 @@ namespace SimpleFTP
             directoryContent.AddRange(files.Select(file => (file, false)));
             directoryContent.AddRange(directories.Select(directory => (directory, true)));
 
-            return (size , directoryContent);
+            return (size, directoryContent);
         }
 
         private async Task<(long size, byte[] content)> Get(string path)

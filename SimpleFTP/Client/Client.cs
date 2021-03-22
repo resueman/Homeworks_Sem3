@@ -49,7 +49,7 @@ namespace SimpleFTP
 
                 return (size, directoryContent.Count > 0 ? directoryContent : null);
             }
-            catch (SocketException e)
+            catch (Exception e) when (e is SocketException || e is IOException && e.InnerException is SocketException)
             {
                 throw new ConnectionToServerException(e.Message, e);
             }
@@ -76,7 +76,7 @@ namespace SimpleFTP
 
                 return (long.Parse(size), content);
             }
-            catch (SocketException e)
+            catch (Exception e) when (e is SocketException || e is IOException && e.InnerException is SocketException)
             {
                 throw new ConnectionToServerException(e.Message, e);
             }
@@ -85,7 +85,7 @@ namespace SimpleFTP
         private async Task WaitForResponse()
         {
             var timeout = 10;
-            var maxTimeout = 1000000;
+            var maxTimeout = 10000;
             while (timeout < maxTimeout)
             {
                 if (networkStream.DataAvailable)
