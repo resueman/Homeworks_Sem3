@@ -62,7 +62,7 @@ namespace SimpleFTP
 
                 return (size, directoryContent.Count > 0 ? directoryContent : null);
             }
-            catch (IOException e)
+            catch (Exception e) when (e is IOException || e is SocketException || e is ObjectDisposedException)
             {
                 throw new ConnectionToServerException(e.Message, e);
             }
@@ -99,7 +99,7 @@ namespace SimpleFTP
 
                 return (long.Parse(size), content);
             }
-            catch (Exception e) when (e is IOException || e is SocketException)
+            catch (Exception e) when (e is IOException || e is SocketException || e is ObjectDisposedException)
             {
                 throw new ConnectionToServerException(e.Message, e);
             }

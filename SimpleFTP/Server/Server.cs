@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Text;
+using System.Threading;
 
 namespace SimpleFTP
 {
@@ -15,8 +16,11 @@ namespace SimpleFTP
     /// </summary>
     public class Server : IDisposable
     {
+        private readonly CancellationTokenSource cts;
         private readonly TcpListener listener;
         private Task mainTask;
+
+        public bool IsStopped { get; private set; }
 
         /// <summary>
         /// Creates instance of network server
@@ -25,6 +29,7 @@ namespace SimpleFTP
         public Server(int port = 8888)
         {
             listener = new TcpListener(IPAddress.Any, port);
+            cts = new CancellationTokenSource();
         }
 
         /// <summary>
@@ -33,7 +38,9 @@ namespace SimpleFTP
         public void Stop()
         {
             listener.Stop();
+            cts.Cancel();
             mainTask.Wait();
+            Dispose();
         }
 
         /// <summary>
@@ -41,6 +48,7 @@ namespace SimpleFTP
         /// </summary>
         public void Start()
         {
+            IsStopped = false;
             mainTask = Task.Run(async () =>
             {
                 listener.Start();
@@ -49,6 +57,10 @@ namespace SimpleFTP
                     try
                     {
                         var client = await listener.AcceptTcpClientAsync();
+                        if (cts.IsCancellationRequested)
+                        {
+                            return;
+                        }
                         HandleClient(client);
                     }
                     catch (Exception e) when (e is InvalidOperationException || e is SocketException)
@@ -161,6 +173,8 @@ namespace SimpleFTP
         public void Dispose()
         {
             listener.Stop();
+            cts.Dispose();
+            IsStopped = true;
         }
     }
 }
