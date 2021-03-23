@@ -73,7 +73,7 @@ namespace SimpleFTP
         /// </summary>
         /// <param name="pathToFile">Path to downloading file</param>
         /// <returns>Size and file content according to file transport protocol</returns>
-        public async Task<(long size, byte[] content)> Get(string pathToFile)
+        public async Task<(long size, byte[] content)> Get(string pathToFile, string pathToDownloadTo = null)
         {
             try
             {
@@ -92,12 +92,23 @@ namespace SimpleFTP
                 var content = new byte[responseBytes.Length - sizeInBytes.Length];
                 Array.Copy(responseBytes, sizeInBytes.Length, content, 0, content.Length);
 
+                if (pathToDownloadTo != null)
+                {
+                    Download(pathToDownloadTo, content);
+                }
+
                 return (long.Parse(size), content);
             }
             catch (Exception e) when (e is IOException || e is SocketException)
             {
                 throw new ConnectionToServerException(e.Message, e);
             }
+        }
+
+        private void Download(string pathToDownload, byte[] content)
+        {
+            using var writer = new StreamWriter(pathToDownload);
+            writer.Write(Encoding.UTF8.GetString(content));           
         }
 
         private async Task WaitForResponse()
