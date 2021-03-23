@@ -3,6 +3,7 @@ image: Visual Studio 2019
 environment:
     matrix:
       - solution_name: ParallelAndSynchronousMatrixMultiplication/ParallelAndSynchronousMatrixMultiplication.sln
+      - solution_name: Lazy/Lazy.sln
       - solution_name: SimpleFTP/SimpleFTP.sln
     
 before_build:
