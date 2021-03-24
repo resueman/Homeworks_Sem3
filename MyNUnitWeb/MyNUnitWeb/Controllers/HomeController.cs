@@ -10,12 +10,20 @@ using System.Threading.Tasks;
 
 namespace MyNUnitWeb.Controllers
 {
+    /// <summary>
+    /// Main controller
+    /// </summary>
     public class HomeController : Controller
     {
         private readonly IWebHostEnvironment _environment;
         private readonly Repository _repository;
         private readonly CurrentState _currentState;
 
+        /// <summary>
+        /// Creates instance of controller
+        /// </summary>
+        /// <param name="environment">environment</param>
+        /// <param name="repository">repository containing history</param>
         public HomeController(IWebHostEnvironment environment, Repository repository)
         {
             _environment = environment;
@@ -23,22 +31,36 @@ namespace MyNUnitWeb.Controllers
             _currentState = new CurrentState(_environment);
         }
 
+        /// <summary>
+        /// Main page
+        /// </summary>
         public IActionResult Index()
         {
             return View("Index", _currentState);
         }
 
+        /// <summary>
+        /// Show history of all testing assemblies
+        /// </summary>
         public IActionResult History()
         {
             return View(_repository.Assemblies.Include(a => a.Tests).ToList());
         }
 
+        /// <summary>
+        /// Shows details about execution of tests containing in particular assembly
+        /// </summary>
+        /// <param name="id">id of assembly which details we want to see</param>
         [HttpGet("History/Details/{id}")]
         public IActionResult Details(int? id)
         {
             return View(_repository.Assemblies.Include(a => a.Tests).First(a => a.Id == id));
         }
 
+        /// <summary>
+        /// Load assemblies fo testing
+        /// </summary>
+        /// <param name="assembly">Assembly</param>
         [HttpPost]
         public async Task<IActionResult> LoadAssembliesAsync(IFormFile assembly)
         {
@@ -54,6 +76,9 @@ namespace MyNUnitWeb.Controllers
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// Deletes loaded assemblies
+        /// </summary>
         public IActionResult DeleteCurrentAssemblies()
         {
             var directoryInfo = new DirectoryInfo($"{_environment.WebRootPath}/Assemblies/");
@@ -67,6 +92,9 @@ namespace MyNUnitWeb.Controllers
         private static string FormatTimeSpan(TimeSpan timeSpan)
             => string.Format("{0:00}:{1:0000}", timeSpan.Seconds, timeSpan.Milliseconds);
 
+        /// <summary>
+        /// Starts tests containing in loaded assemblies
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> RunTestsAsync()
         {
@@ -84,7 +112,7 @@ namespace MyNUnitWeb.Controllers
                 _repository.RemoveRange(testedAssembly.Tests);
                 await _repository.SaveChangesAsync();
                 
-                var testMethods = await MyNUnit.MyNUnit.Run(assemblyName);
+                var testMethods = (await MyNUnit.MyNUnit.Run(assemblyName)).SelectMany(t => t.TestMethods).ToList();
                 foreach (var testMethod in testMethods)
                 {
                     var testModel = new Test
