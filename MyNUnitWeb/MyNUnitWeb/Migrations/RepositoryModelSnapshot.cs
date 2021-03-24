@@ -44,11 +44,14 @@ namespace MyNUnitWeb.Migrations
                     b.Property<int?>("AssemblyId")
                         .HasColumnType("int");
 
+                    b.Property<string>("AssemblyName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("ExecutionStatus")
                         .HasColumnType("int");
 
-                    b.Property<TimeSpan>("ExecutionTime")
-                        .HasColumnType("time");
+                    b.Property<string>("ExecutionTime")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Message")
                         .HasColumnType("nvarchar(max)");

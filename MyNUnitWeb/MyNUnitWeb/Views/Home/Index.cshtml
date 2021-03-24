@@ -1,22 +1,71 @@
 ﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-
+@model CurrentState
 @{
     ViewData["Title"] = "Home Page";
 }
 
 <div>
-    <h3>Choose assembly to test:</h3>
-    <div class="col">
-        <div class="row">
-            <form asp-action="LoadAssemblies" asp-controller="Home" method="post" enctype="multipart/form-data">
-                <input type="file" name="assembly" accept=".dll"/>
-                <input type="submit" value="Загрузить" />
-            </form>
+    <div class="mb-5">
+        <h3>Загрузите сборки для тестирования</h3>
+        <form asp-action="LoadAssemblies" asp-controller="Home" method="post" enctype="multipart/form-data">
+            <input type="file" name="assembly" accept=".dll" />
+            <input type="submit" value="Загрузить" />
+        </form>
+    </div>
+    <div class="mb-5">
+        <h3>Загруженные сборки</h3>
+        <div>
+            <table>
+                @foreach (var assembly in Model.Assemblies)
+                {
+                    <tr><td>@assembly</td></tr>
+                }
+            </table>
         </div>
-        <div class="row mt-2">
-            <form asp-action="RunTests" method="post">
-                <input asp-action="RunTests" method="post" type="submit" value="Начать тестирование" />
-            </form>
-        </div>
+        <form asp-action="DeleteCurrentAssemblies" asp-controller="Home">
+            <input type="submit" value="Очистить" />
+        </form>
+    </div>
+    <div class="mb-2">
+        <h3>Тестирование</h3>
+    </div>
+    <div class="mb-2">
+        <form asp-action="RunTests" asp-controller="Home" method="post">
+            <input asp-action="RunTests" asp-controller="Home" method="post" type="submit" value="Начать" />
+        </form>
+    </div>
+    <div class="mb-2">
+        <table class="table table-striped table-bordered table-sm">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>ExecutionTime</th>
+                    <th>Status</th>
+                    <th>Message</th>
+                    <th>Assembly</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{var i = 1;}
+                @foreach (var test in Model.Tests)
+                {
+                    var src = test.ExecutionStatus == Methods.ExecutionStatus.Success
+                        ? "/success.ico"
+                        : test.ExecutionStatus == Methods.ExecutionStatus.Failed
+                            ? "/fail.ico"
+                            : "/ignored.png";
+                    <tr>
+                        <td>@i</td>
+                        <td>@test.Name</td>
+                        <td>@test.ExecutionTime</td>
+                        <td><img width="15" src="@src" /></td>
+                        <td>@test.Message</td>
+                        <td>@test.AssemblyName</td>
+                    </tr>
+                    ++i;
+                }
+            </tbody>
+        </table>
     </div>
 </div>

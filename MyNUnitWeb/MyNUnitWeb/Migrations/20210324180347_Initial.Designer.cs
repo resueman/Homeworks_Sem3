@@ -10,7 +10,7 @@ using MyNUnitWeb;
 namespace MyNUnitWeb.Migrations
 {
     [DbContext(typeof(Repository))]
-    [Migration("20210320201920_Initial")]
+    [Migration("20210324180347_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,11 +46,14 @@ namespace MyNUnitWeb.Migrations
                     b.Property<int?>("AssemblyId")
                         .HasColumnType("int");
 
+                    b.Property<string>("AssemblyName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("ExecutionStatus")
                         .HasColumnType("int");
 
-                    b.Property<TimeSpan>("ExecutionTime")
-                        .HasColumnType("time");
+                    b.Property<string>("ExecutionTime")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Message")
                         .HasColumnType("nvarchar(max)");

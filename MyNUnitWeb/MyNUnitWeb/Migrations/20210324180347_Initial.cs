@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace MyNUnitWeb.Migrations
 {
@@ -27,9 +26,10 @@ namespace MyNUnitWeb.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ExecutionTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    ExecutionTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ExecutionStatus = table.Column<int>(type: "int", nullable: false),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AssemblyName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AssemblyId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>

@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyNUnitWeb.Models;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,16 +14,18 @@ namespace MyNUnitWeb.Controllers
     {
         private readonly IWebHostEnvironment _environment;
         private readonly Repository _repository;
+        private readonly CurrentState _currentState;
 
         public HomeController(IWebHostEnvironment environment, Repository repository)
         {
             _environment = environment;
             _repository = repository;
+            _currentState = new CurrentState(_environment);
         }
 
         public IActionResult Index()
         {
-            return View();
+            return View("Index", _currentState);
         }
 
         public IActionResult History()
@@ -38,34 +39,41 @@ namespace MyNUnitWeb.Controllers
             return View(_repository.Assemblies.Include(a => a.Tests).First(a => a.Id == id));
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-
         [HttpPost]
         public async Task<IActionResult> LoadAssembliesAsync(IFormFile assembly)
         {
-            if (!Directory.Exists($"{_environment.WebRootPath}/Files/"))
+            if (!Directory.Exists($"{_environment.WebRootPath}/Assemblies/"))
             {
-                Directory.CreateDirectory($"{_environment.WebRootPath}/Files/");
+                Directory.CreateDirectory($"{_environment.WebRootPath}/Assemblies/");
             }
             if (assembly != null)
             {
-                using var fileStream = new FileStream($"{_environment.WebRootPath}/Files/{assembly.FileName}", FileMode.Create);
+                using var fileStream = new FileStream($"{_environment.WebRootPath}/Assemblies/{assembly.FileName}", FileMode.Create);
                 await assembly.CopyToAsync(fileStream);
             }
-
             return RedirectToAction("Index");
         }
+
+        public IActionResult DeleteCurrentAssemblies()
+        {
+            var directoryInfo = new DirectoryInfo($"{_environment.WebRootPath}/Assemblies/");
+            foreach (var file in directoryInfo.GetFiles())
+            {
+                file.Delete();
+            }
+            return RedirectToAction("Index");
+        }
+
+        private static string FormatTimeSpan(TimeSpan timeSpan)
+            => string.Format("{0:00}:{1:0000}", timeSpan.Seconds, timeSpan.Milliseconds);
 
         [HttpPost]
         public async Task<IActionResult> RunTestsAsync()
         {
-            foreach (var assemblyName in Directory.EnumerateFiles(_environment.WebRootPath + "/Files/"))
+            foreach (var assemblyName in Directory.EnumerateFiles($"{_environment.WebRootPath}/Assemblies/"))
             {
-                var name = assemblyName.Split("/Files/")[1];
+
+                var name = Path.GetFileName(assemblyName);
                 var testedAssembly = _repository.Assemblies.Include(a => a.Tests).FirstOrDefault(a => a.Name == name);
                 if (testedAssembly == null)
                 {
@@ -83,14 +91,16 @@ namespace MyNUnitWeb.Controllers
                     {
                         Name = testMethod.Method.Name,
                         ExecutionStatus = testMethod.ExecutionResult.Status,
-                        ExecutionTime = testMethod.ExecutionResult.ExecutionTime,
-                        Message = testMethod.ExecutionResult.Message
+                        ExecutionTime = FormatTimeSpan(testMethod.ExecutionResult.ExecutionTime),
+                        Message = testMethod.ExecutionResult.Message,
+                        AssemblyName = name
                     };
                     testedAssembly.Tests.Add(testModel);
+                    _currentState.Tests.Add(testModel);
                 }
                 await _repository.SaveChangesAsync();
             }            
-            return RedirectToAction("Index");
+            return View("Index", _currentState);
         }
     }
 }

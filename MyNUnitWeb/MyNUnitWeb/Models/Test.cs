@@ -15,11 +15,13 @@ namespace MyNUnitWeb.Models
 
         public string Name { get; set; }
 
-        public TimeSpan ExecutionTime { get; set; }
+        public string ExecutionTime { get; set; }
 
         [EnumDataType(typeof(ExecutionStatus))]
         public ExecutionStatus ExecutionStatus { get; set; }
 
         public string Message { get; set; }
+
+        public string AssemblyName { get; set; }
     }
 }
