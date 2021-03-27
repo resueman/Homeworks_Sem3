@@ -6,6 +6,13 @@
         xmlns:local="clr-namespace:ClientGUI"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" MinWidth="750" MinHeight="450">
+    <Window.CommandBindings>
+        <CommandBinding Command="local:Commands.Download" CanExecute="DownloadCommand_CanExecute" Executed="DownloadCommand_Executed" />
+        <CommandBinding Command="local:Commands.Connect" CanExecute="ConnectCommand_CanExecute" Executed="ConnectCommand_Executed" />
+        <CommandBinding Command="local:Commands.DownloadAll" CanExecute="DownloadAllCommand_CanExecute" Executed="DownloadAllCommand_Executed" />
+        <CommandBinding Command="local:Commands.GoBack" CanExecute="GoBackCommand_CanExecute" Executed="GoBackCommand_Executed" />
+    </Window.CommandBindings>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="1.5*"/>
@@ -28,11 +35,11 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <Label Grid.Row="0" Grid.ColumnSpan="3" HorizontalContentAlignment="Center" FontSize="20">
-                Navigating the server's viewable content
+                Server content explorer
             </Label>
-            <Button Grid.Column="0" Grid.Row="1">Back</Button>
-            <Button Grid.Column="1" Grid.Row="1">Download</Button>
-            <Button Grid.Column="2" Grid.Row="1">Download all</Button>
+            <Button Grid.Column="0" Grid.Row="1" Command="local:Commands.GoBack">Back</Button>
+            <Button Grid.Column="1" Grid.Row="1" Command="local:Commands.Download">Download</Button>
+            <Button Grid.Column="2" Grid.Row="1" Command="local:Commands.DownloadAll">Download all</Button>
         </Grid>
 
         <Grid Grid.Column="1" Grid.Row="0">
@@ -50,17 +57,35 @@
             <Button Grid.Row="1" Grid.Column="1" Content="Изменить" FontSize="18"></Button>
         </Grid>
 
-        <ScrollViewer Grid.Column="0" Grid.Row="1">
-            <ListView>
-                
-            </ListView>
-        </ScrollViewer>
+        <ListBox Grid.Column="0" Grid.Row="1" ItemsSource="{Binding ServerContent}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Image Grid.Column="0" Source="{Binding IconSource}" Width="15" Height="12"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Name}" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
-        <ScrollViewer Grid.Column="1" Grid.Row="1">
-            <ListView>
-
-            </ListView>
-        </ScrollViewer>
+        <ListBox Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Downloads}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Name}"/>
+                        <ProgressBar Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding ProgressValue}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
         <Grid Grid.Row="2" Grid.Column="1">
             <Grid.RowDefinitions>
@@ -79,9 +104,9 @@
             </Label>
             <Label Grid.Row="1" Grid.Column="0" Content="Address" FontSize="16"/>
             <Label Grid.Row="2" Grid.Column="0" Content="Port" FontSize="16"/>
-            <TextBox Grid.Row="1" Grid.Column="1"/>
-            <TextBox Grid.Row="2" Grid.Column="1"/>
-            <Button  Grid.Row="3" Grid.Column="1" Content="Connect" FontSize="18"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Address}" FontSize="16"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Port}" FontSize="16"/>
+            <Button  Grid.Row="3" Grid.Column="1" Content="Connect" FontSize="18" Command="local:Commands.Connect"/>
         </Grid>
     </Grid>
 </Window>

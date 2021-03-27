@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31112.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientGUI", "ClientGUI\ClientGUI.csproj", "{28458A8C-616B-4286-97B3-0CB18E9FB98A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientGUI", "ClientGUI\ClientGUI.csproj", "{28458A8C-616B-4286-97B3-0CB18E9FB98A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "..\..\FTP\Client\Client.csproj", "{94AECB35-9A64-4615-B80D-1107F72C322A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "..\..\FTP\Server\Server.csproj", "{CE8E79BB-05F6-4C66-8E61-174AA1A65EA6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleFTP.Tests", "..\..\FTP\SimpleFTP.Tests\SimpleFTP.Tests.csproj", "{AA9D90A1-7758-4AC2-8A94-2217C936313C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{28458A8C-616B-4286-97B3-0CB18E9FB98A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28458A8C-616B-4286-97B3-0CB18E9FB98A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28458A8C-616B-4286-97B3-0CB18E9FB98A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94AECB35-9A64-4615-B80D-1107F72C322A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94AECB35-9A64-4615-B80D-1107F72C322A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94AECB35-9A64-4615-B80D-1107F72C322A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94AECB35-9A64-4615-B80D-1107F72C322A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE8E79BB-05F6-4C66-8E61-174AA1A65EA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE8E79BB-05F6-4C66-8E61-174AA1A65EA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE8E79BB-05F6-4C66-8E61-174AA1A65EA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE8E79BB-05F6-4C66-8E61-174AA1A65EA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA9D90A1-7758-4AC2-8A94-2217C936313C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA9D90A1-7758-4AC2-8A94-2217C936313C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA9D90A1-7758-4AC2-8A94-2217C936313C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA9D90A1-7758-4AC2-8A94-2217C936313C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
