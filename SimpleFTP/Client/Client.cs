@@ -48,6 +48,15 @@ namespace SimpleFTP
         }
 
         /// <summary>
+        /// Closes client
+        /// </summary>
+        public void Close()
+        {
+            client.Close();
+            client.Dispose();
+        }
+
+        /// <summary>
         /// Makes a listing of files and directories in a specified directory on the server
         /// </summary>
         /// <param name="pathToDirectory">Path to directory, which content should be listed</param>
