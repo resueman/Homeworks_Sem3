@@ -23,5 +23,10 @@ namespace MyNUnitWeb
         /// Tests that was ever running
         /// </summary>
         public DbSet<Test> Tests { get; set; }
+
+        /// <summary>
+        /// Assembly's testing runs
+        /// </summary>
+        public DbSet<TestingSession> TestingSessions { get; set; }
     }
 }

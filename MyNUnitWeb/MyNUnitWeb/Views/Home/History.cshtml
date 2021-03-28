@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Assembly>
+﻿@model IEnumerable<TestingSession>
 @{
     ViewData["Title"] = "History";
 }
@@ -17,18 +17,20 @@
                 <th>Количество пройденных тестов</th>
                 <th>Количество проваленных тестов</th>
                 <th>Количество проигнорированных тестов</th>
+                <th>Дата и время тестирования</th>
                 <th>Подробнее</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (MyNUnitWeb.Models.Assembly a in Model)
+            @foreach (MyNUnitWeb.Models.TestingSession ts in Model)
             {
                 <tr>
-                    <td>@a.Name</td>
-                    <td>@a.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Success)</td>
-                    <td>@a.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Failed)</td>
-                    <td>@a.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Ignored)</td>
-                    <td><a href="~/History/Details/@a.Id">Details</a></td>
+                    <td>@ts.Assembly.Name</td>
+                    <td>@ts.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Success)</td>
+                    <td>@ts.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Failed)</td>
+                    <td>@ts.Tests.Count(t => t.ExecutionStatus == Methods.ExecutionStatus.Ignored)</td>
+                    <td>@ts.DateTime</td>
+                    <td><a href="~/History/Details/@ts.Id">Details</a></td>
                 </tr>
             }
         </tbody>

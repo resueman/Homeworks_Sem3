@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyNUnitWeb.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,7 +45,7 @@ namespace MyNUnitWeb.Controllers
         /// </summary>
         public IActionResult History()
         {
-            return View(_repository.Assemblies.Include(a => a.Tests).ToList());
+            return View(_repository.TestingSessions.Include(ts => ts.Tests).Include(ts => ts.Assembly).ToList());
         }
 
         /// <summary>
@@ -54,7 +55,7 @@ namespace MyNUnitWeb.Controllers
         [HttpGet("History/Details/{id}")]
         public IActionResult Details(int? id)
         {
-            return View(_repository.Assemblies.Include(a => a.Tests).First(a => a.Id == id));
+            return View(_repository.TestingSessions.Include(ts => ts.Tests).Include(ts => ts.Assembly).First(a => a.Id == id));
         }
 
         /// <summary>
@@ -101,16 +102,16 @@ namespace MyNUnitWeb.Controllers
             foreach (var assemblyName in Directory.EnumerateFiles($"{_environment.WebRootPath}/Assemblies/"))
             {
                 var name = Path.GetFileName(assemblyName);
-                var testedAssembly = _repository.Assemblies.Include(a => a.Tests).FirstOrDefault(a => a.Name == name);
+                var testedAssembly = _repository.Assemblies.Include(a => a.TestingSessions).FirstOrDefault(a => a.Name == name);
                 if (testedAssembly == null)
                 {
                     testedAssembly = (await _repository.AddAsync(new Assembly { Name = name })).Entity;
                     await _repository.SaveChangesAsync();
                 }
                 
-                _repository.RemoveRange(testedAssembly.Tests);
-                await _repository.SaveChangesAsync();
-                
+                var testingSession = new TestingSession(DateTime.Now, testedAssembly.Id);
+                testedAssembly.TestingSessions.Add(testingSession);
+
                 var testMethods = (await MyNUnit.MyNUnit.Run(assemblyName)).SelectMany(t => t.TestMethods).ToList();
                 foreach (var testMethod in testMethods)
                 {
@@ -122,7 +123,7 @@ namespace MyNUnitWeb.Controllers
                         Message = testMethod.ExecutionResult.Message,
                         AssemblyName = name
                     };
-                    testedAssembly.Tests.Add(testModel);
+                    testingSession.Tests.Add(testModel);
                     _currentState.Tests.Add(testModel);
                 }
                 await _repository.SaveChangesAsync();

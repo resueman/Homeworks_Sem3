@@ -41,9 +41,6 @@ namespace MyNUnitWeb.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("AssemblyId")
-                        .HasColumnType("int");
-
                     b.Property<string>("AssemblyName")
                         .HasColumnType("nvarchar(max)");
 
@@ -59,21 +56,60 @@ namespace MyNUnitWeb.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("TestingSessionId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("AssemblyId");
+                    b.HasIndex("TestingSessionId");
 
                     b.ToTable("Tests");
                 });
 
+            modelBuilder.Entity("MyNUnitWeb.Models.TestingSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AssemblyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssemblyId");
+
+                    b.ToTable("TestingSessions");
+                });
+
             modelBuilder.Entity("MyNUnitWeb.Models.Test", b =>
                 {
-                    b.HasOne("MyNUnitWeb.Models.Assembly", null)
+                    b.HasOne("MyNUnitWeb.Models.TestingSession", null)
                         .WithMany("Tests")
-                        .HasForeignKey("AssemblyId");
+                        .HasForeignKey("TestingSessionId");
+                });
+
+            modelBuilder.Entity("MyNUnitWeb.Models.TestingSession", b =>
+                {
+                    b.HasOne("MyNUnitWeb.Models.Assembly", "Assembly")
+                        .WithMany("TestingSessions")
+                        .HasForeignKey("AssemblyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Assembly");
                 });
 
             modelBuilder.Entity("MyNUnitWeb.Models.Assembly", b =>
+                {
+                    b.Navigation("TestingSessions");
+                });
+
+            modelBuilder.Entity("MyNUnitWeb.Models.TestingSession", b =>
                 {
                     b.Navigation("Tests");
                 });

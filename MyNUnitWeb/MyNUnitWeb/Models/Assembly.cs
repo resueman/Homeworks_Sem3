@@ -12,7 +12,7 @@ namespace MyNUnitWeb.Models
         /// </summary>
         public Assembly()
         {
-            Tests = new List<Test>();
+            TestingSessions = new List<TestingSession>();
         }
 
         /// <summary>
@@ -24,10 +24,10 @@ namespace MyNUnitWeb.Models
         /// Name of assembly
         /// </summary>
         public string Name { get; set; }
-
+        
         /// <summary>
-        /// Tests containing in assembly
+        /// Contains history of all assembly's test runs
         /// </summary>
-        public List<Test> Tests { get; set; }
+        public List<TestingSession> TestingSessions { get; set; }
     }
 }
