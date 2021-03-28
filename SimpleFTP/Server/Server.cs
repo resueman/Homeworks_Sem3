@@ -6,7 +6,6 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Text;
 using System.Threading;
 
 namespace SimpleFTP
@@ -122,13 +121,7 @@ namespace SimpleFTP
                     await streamWriter.WriteLineAsync(listResponse);
                     break;
                 case 2:
-                    var (contentSize, content) = await Get(path);
-                    var sizeInString = $"{contentSize} ";
-                    var sizeInBytes = Encoding.UTF8.GetBytes(sizeInString);
-                    var response = new byte[sizeInString.Length + contentSize];
-                    sizeInBytes.CopyTo(response, 0);
-                    content.CopyTo(response, sizeInBytes.Length);
-                    await streamWriter.BaseStream.WriteAsync(response);
+                    await Get(path, streamWriter);
                     break;
             }
         }
@@ -150,21 +143,18 @@ namespace SimpleFTP
             return (size, directoryContent);
         }
 
-        private async Task<(long size, byte[] content)> Get(string path)
+        private async Task Get(string path, StreamWriter streamWriter)
         {
             if (!File.Exists(path))
             {
-                return (-1, null);
+                await streamWriter.WriteAsync('-');
+                await streamWriter.WriteAsync('1');
+                return;
             }
-
-            var size = new FileInfo(path).Length;
-            var content = new byte[size];
-            using (var fileStream = new FileStream(path, FileMode.Open))
-            {
-                await fileStream.ReadAsync(content);
-            }
-
-            return (content.Length, content);
+            var sizeOfDownloaded = new FileInfo(path).Length;
+            await streamWriter.WriteAsync(sizeOfDownloaded + " ");
+            using var downloadedStream = new FileStream(path, FileMode.Open);
+            await downloadedStream.CopyToAsync(streamWriter.BaseStream);
         }
 
         /// <summary>

@@ -65,23 +65,17 @@ namespace SimpleFTP.Tests
             new object[]
             {
                 "../../../TestFolder\\notEmpty.txt",
-                30,
-                "../../../Downloads\\notEmpty.txt",
-                "../../../ExpectedDownloads\\notEmpty.txt"
+                30
             },
             new object[]
             {
                 "../../../TestFolder\\empty.txt",
-                0,
-                "../../../Downloads\\empty.txt",
-                "../../../ExpectedDownloads\\empty.txt"
+                0
             },
             new object[]
             {
                 "../../../TestFolder\\SimpleFTP.Tests.runtimeconfig.dev.json",
-                316,
-                "../../../Downloads\\SimpleFTP.Tests.runtimeconfig.dev.json",
-                "../../../ExpectedDownloads\\SimpleFTP.Tests.runtimeconfig.dev.json"
+                316
             }
         };
     }

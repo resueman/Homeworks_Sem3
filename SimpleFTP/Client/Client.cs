@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace SimpleFTP
 {
@@ -13,10 +11,12 @@ namespace SimpleFTP
     /// </summary>
     public class Client : IDisposable
     {
-        private readonly TcpClient client;
-        private readonly NetworkStream networkStream;
-        private readonly StreamReader reader;
-        private readonly StreamWriter writer;
+        private readonly string hostname;
+        private readonly int port;
+        private TcpClient client;
+        private NetworkStream networkStream;
+        private StreamReader reader;
+        private StreamWriter writer;
 
         /// <summary>
         /// Creates instance of network client
@@ -24,6 +24,15 @@ namespace SimpleFTP
         /// <param name="hostname">Hostname</param>
         /// <param name="port">Port</param>
         public Client(string hostname = "127.0.0.1", int port = 8888)
+        {
+            this.hostname = hostname;
+            this.port = port;
+        }
+
+        /// <summary>
+        /// Connects to server
+        /// </summary>
+        public void Connect()
         {
             try
             {
@@ -71,50 +80,88 @@ namespace SimpleFTP
         /// <summary>
         /// Returns file content
         /// </summary>
-        /// <param name="pathToFile">Path to downloading file</param>
+        /// <param name="sourcePath">Path to file on server that will be download</param>
+        /// <param name="destinationFolder">Folder where file would be downloaded</param>
         /// <returns>Size and file content according to file transport protocol</returns>
-        public async Task<(long size, byte[] content)> Get(string pathToFile, string pathToDownloadTo = null)
+        public async Task<string> Get(string sourcePath, string destinationFolder)
         {
+            var path = $"{destinationFolder}\\{Path.GetFileName(sourcePath)}";
             try
             {
-                await writer.WriteLineAsync($"2 {pathToFile}");
+                await writer.WriteLineAsync($"2 {sourcePath}");
 
-                var responseBytes = await ReceiveBytes();
-
-                var responseString = Encoding.UTF8.GetString(responseBytes);
-                var size = Regex.Match(responseString, @"-?\d+\s?").Value;
-                if (size.Trim() == "-1")
+                var size = await ReadSize();
+                if (size == -1)
                 {
-                    return (-1, null);
-                }
-
-                var sizeInBytes = Encoding.UTF8.GetBytes(size);
-                var content = new byte[responseBytes.Length - sizeInBytes.Length];
-                Array.Copy(responseBytes, sizeInBytes.Length, content, 0, content.Length);
-
-                if (pathToDownloadTo != null)
-                {
-                    Download(pathToDownloadTo, content);
-                }
-
-                return (long.Parse(size), content);
+                    throw new FileNotFoundException($"{sourcePath} doesn't exist");
+                }    
+                
+                await Download(size, path);
             }
             catch (Exception e) when (e is IOException || e is SocketException || e is ObjectDisposedException)
             {
                 throw new ConnectionToServerException(e.Message, e);
             }
+            return path;
         }
 
-        private void Download(string pathToDownload, byte[] content)
+        private async Task<long> ReadSize()
         {
-            using var writer = new StreamWriter(pathToDownload);
-            writer.Write(Encoding.UTF8.GetString(content));           
+            await WaitForResponse();
+
+            var buffer = new byte[long.MaxValue.ToString().Length + 1];
+            networkStream.Read(buffer, 0, 2);
+
+            if (Convert.ToChar(buffer[0]) == '-' && Convert.ToChar(buffer[1]) == '1')
+            {
+                return -1;
+            }
+
+            var currentPosition = 1;
+            while (buffer[currentPosition] != ' ')
+            {
+                ++currentPosition;
+                await networkStream.ReadAsync(buffer, currentPosition, 1);
+            }
+            var sizeAsByteArray = new byte[currentPosition + 1];
+            Array.Copy(buffer, sizeAsByteArray, currentPosition + 1);
+            var size = "";
+            foreach (var b in sizeAsByteArray)
+            {
+                size += Convert.ToChar(b);
+            }
+            return long.Parse(size);
+        }
+
+        private async Task Download(long size, string pathToDownload)
+        {
+            using var fileStream = File.Create(pathToDownload);
+
+            var bufferSize = 1024;
+            var buffer = new byte[bufferSize];
+            for (var i = 0; i < size / bufferSize; ++i)
+            {
+                await Copy(buffer, reader.BaseStream, fileStream);
+            }
+
+            buffer = new byte[size % bufferSize];
+            await Copy(buffer, reader.BaseStream, fileStream);
+        }
+
+        private async Task Copy(byte[] buffer, Stream source, Stream destination)
+        {
+            if (buffer.Length == 0)
+            {
+                return;
+            }
+            await source.ReadAsync(buffer, 0, buffer.Length);
+            await destination.WriteAsync(buffer, 0, buffer.Length);
         }
 
         private async Task WaitForResponse()
         {
             var timeout = 10;
-            var maxTimeout = 10000;
+            var maxTimeout = 100000;
             while (timeout < maxTimeout)
             {
                 if (networkStream.DataAvailable)
@@ -125,22 +172,6 @@ namespace SimpleFTP
                 timeout *= 2;
             }
             throw new ConnectionToServerException("Server response timed out");
-        }
-
-        private async Task<byte[]> ReceiveBytes()
-        {
-            await WaitForResponse();
-
-            var response = new byte[0];
-            var receiveBuffer = new byte[client.ReceiveBufferSize];
-            while (networkStream.DataAvailable)
-            {
-                var actuallyReceived = await networkStream.ReadAsync(receiveBuffer, 0, receiveBuffer.Length);
-                Array.Resize(ref response, response.Length + actuallyReceived);
-                Array.Copy(receiveBuffer, response, actuallyReceived);
-            }
-
-            return response;
         }
 
         /// <summary>

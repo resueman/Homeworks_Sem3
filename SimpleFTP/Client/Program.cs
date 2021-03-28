@@ -25,6 +25,7 @@ namespace SimpleFTP
             using var client = new Client();
             try
             {
+                client.Connect();
                 while (true)
                 {
                     Console.WriteLine("\nPlease, choose option");
@@ -44,9 +45,8 @@ namespace SimpleFTP
                         case "2":
                             Console.WriteLine("Path to file: ");
                             var pathToFile = Console.ReadLine();
-                            var (sizeOfFile, fileContent) = await client.Get(pathToFile);
-                            Console.WriteLine($"size: {sizeOfFile}");
-                            Console.WriteLine("File successfully downloaded");
+                            var path = await client.Get(pathToFile, "./Downloads");
+                            Console.WriteLine($"File successfully downloaded, path: {path}");
                             break;
                         case "3":
                             return;

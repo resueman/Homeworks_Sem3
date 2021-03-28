@@ -54,7 +54,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Downloads\" />
     <Folder Include="TestFolder\FolderWithoutContent\" />
   </ItemGroup>
 
