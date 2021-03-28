@@ -62,16 +62,7 @@ namespace SimpleFTP.Tests
 
         [Test]
         [TestCaseSource(typeof(SimpleFTPTestsTestCases), "GetTestCases")]
-        public async Task GetRequestReturnsRightSizeOfContentTest(string fileToDownload, int expectedSize)
-        {
-            var pathToDownloaded = await client.Get(fileToDownload, downloadFolderPath);
-            var actualSize = new FileInfo(pathToDownloaded).Length;
-            Assert.AreEqual(expectedSize, actualSize);
-        }
-
-        [Test]
-        [TestCaseSource(typeof(SimpleFTPTestsTestCases), "GetTestCases")]
-        public async Task GetRequestReturnsExpectedFileContentTest(string fileToDownload, int expectedSize)
+        public async Task GetRequestReturnsExpectedFileContentTest(string fileToDownload)
         {
             var fileName = Path.GetFileName(fileToDownload);
             var pathToDownloaded = await client.Get(fileToDownload, downloadFolderPath);

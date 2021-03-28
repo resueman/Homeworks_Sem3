@@ -59,17 +59,14 @@ namespace SimpleFTP.Tests
             new object[]
             {
                 "../../../TestFolder\\notEmpty.txt",
-                30
             },
             new object[]
             {
                 "../../../TestFolder\\empty.txt",
-                0
             },
             new object[]
             {
                 "../../../TestFolder\\SimpleFTP.Tests.runtimeconfig.dev.json",
-                316
             }
         };
     }
