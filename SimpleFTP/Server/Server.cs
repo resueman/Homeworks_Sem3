@@ -74,20 +74,28 @@ namespace SimpleFTP
         {
             Task.Run(async () =>
             {
-                using var stream = client.GetStream();
-                using var streamReader = new StreamReader(stream);
-                using var streamWriter = new StreamWriter(stream) { AutoFlush = true };
-                while (true)
+                try
                 {
-                    try
+                    using var stream = client.GetStream();
+                    using var streamReader = new StreamReader(stream);
+                    using var streamWriter = new StreamWriter(stream) { AutoFlush = true };
+                    while (true)
                     {
-                        var request = await streamReader.ReadLineAsync();
-                        await ProcessRequest(request, streamWriter);
+                        try
+                        {
+                            var request = await streamReader.ReadLineAsync();
+                            await ProcessRequest(request, streamWriter);
+                        }
+                        catch (Exception e) when (e is IOException || e is InvalidOperationException)
+                        {
+                            break;
+                        }
                     }
-                    catch (Exception e) when (e is IOException || e is InvalidOperationException)
-                    {
-                        break;
-                    }
+                }
+                finally
+                {
+                    client.Close();
+                    client.Dispose();
                 }
             });
         }
