@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Win32;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace GuiForSimpleFTP
 {
@@ -52,8 +43,7 @@ namespace GuiForSimpleFTP
         // Download All
         private void DownloadAllCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            var viewModel = DataContext as ClientViewModel;
-            e.CanExecute = viewModel.ServerContent.Any(i => !i.IsDirectory);
+            e.CanExecute = DataContext is ClientViewModel viewModel && viewModel.ServerContent.Any(i => !i.IsDirectory);
         }
 
         private void DownloadAllCommand_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -90,7 +80,7 @@ namespace GuiForSimpleFTP
 
         private async void GoBackCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if ((DataContext is ClientViewModel viewModel))
+            if (DataContext is ClientViewModel viewModel)
             {
                 await viewModel.GoBackToParentFolder();
             }
@@ -98,11 +88,13 @@ namespace GuiForSimpleFTP
 
         // step into directory
         private void StepIntoCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
+        { 
             if (ServerContent != null) //
             {
-                var selected = ServerContent.SelectedItem as ServerItem;
-                e.CanExecute = selected != null && selected.IsDirectory;
+                if (DataContext is ClientViewModel viewModel)
+                {
+                    e.CanExecute = viewModel.ServerContent.Any(i => i.IsDirectory) && ServerContent.SelectedItem is ServerItem selected && selected.IsDirectory;
+                }
             }
         }
 
@@ -115,6 +107,30 @@ namespace GuiForSimpleFTP
             }
         }
 
-        // change download folder
+        // change download folder 
+        private void ChangeDownloadFolderCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = DataContext is ClientViewModel viewModel && viewModel.IsConnected;
+        }
+
+        private void ChangeDownloadFolderCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (!(DataContext is ClientViewModel viewModel))
+            {
+                return;
+            }
+
+            var folderBrowser = new OpenFileDialog
+            {
+                ValidateNames = false,
+                CheckFileExists = false,
+                CheckPathExists = true,
+                FileName = "select this folder", Filter="folders|*.fff"
+            };
+            if (folderBrowser.ShowDialog() is true)
+            {
+                viewModel.DownloadFolder = Path.GetDirectoryName(folderBrowser.FileName);
+            }
+        }
     }
 }

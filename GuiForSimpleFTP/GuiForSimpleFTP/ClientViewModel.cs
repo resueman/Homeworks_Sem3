@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -13,8 +14,20 @@ namespace GuiForSimpleFTP
     {
         private int port = 8888;
         private string address = "127.0.0.1";
-        private string downloadFolder = "./Downloads/";
         private Client client;
+
+        public bool IsConnected { get; set; } = false;
+
+        private string downloadFolder;
+        public string DownloadFolder 
+        {
+            get => downloadFolder; 
+            set 
+            { 
+                downloadFolder = value; 
+                OnPropertyChanged(nameof(DownloadFolder));
+            }
+        }
 
         public string CurrentExplorerPath { get; private set; } = Root;
 
@@ -61,6 +74,11 @@ namespace GuiForSimpleFTP
             Downloads = new ObservableCollection<Download>();
             ServerContent = new ObservableCollection<ServerItem>();
             client = new Client(Address, Port);
+            if (!Directory.Exists("./Downloads/"))
+            {
+                Directory.CreateDirectory("./Downloads/");
+            }
+            DownloadFolder = "./Downloads/";
         }
 
         public static ClientViewModel BuildClientViewModelAsync()
@@ -78,6 +96,7 @@ namespace GuiForSimpleFTP
             try
             {
                 client.Connect();
+                IsConnected = true;
                 await ListServerContent(Root);
             }
             catch (Exception e)
@@ -91,9 +110,11 @@ namespace GuiForSimpleFTP
             try
             {
                 var content = await client.List(path);
-                var serverContent = content.AsParallel()
-                    .Select(item => new ServerItem(Path.GetFileName(item.name), item.isDirectory))
-                    .OrderBy(item => item.IsDirectory);
+                var serverContent = content == null
+                    ? new List<ServerItem>()
+                    : content.AsParallel()
+                          .Select(item => new ServerItem(Path.GetFileName(item.name), item.isDirectory))
+                          .OrderBy(item => item.IsDirectory).ToList();
 
                 ServerContent.Clear();
                 foreach (var item in serverContent)
@@ -111,7 +132,7 @@ namespace GuiForSimpleFTP
         public async Task GoBackToParentFolder()
         {
             CurrentExplorerPath = CurrentExplorerPath != Root
-                ? CurrentExplorerPath.Substring(0, CurrentExplorerPath.LastIndexOf("\\") - 1)
+                ? CurrentExplorerPath.Substring(0, CurrentExplorerPath.LastIndexOf("\\"))
                 : Root;
 
             await ListServerContent(CurrentExplorerPath);
@@ -129,15 +150,9 @@ namespace GuiForSimpleFTP
         }
 
         // 'change' button - opens explorer
-
-        //using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
-        //{
-        //    System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-        //    var selectedDirectory = dialog.SelectedPath;
-        //}
         public void ChangeDownloadFolder(string newDownloadPath)
         {
-            downloadFolder = newDownloadPath;
+            DownloadFolder = newDownloadPath;
         }
 
         public void DownloadFile(string fileName)
@@ -149,7 +164,7 @@ namespace GuiForSimpleFTP
                 using var client = new Client(Address, Port);
                 client.Connect();
                 var pathToFile = Path.Combine(CurrentExplorerPath, fileName);
-                await client.Get(pathToFile, downloadFolder);
+                await client.Get(pathToFile, DownloadFolder);
             });
         }
 

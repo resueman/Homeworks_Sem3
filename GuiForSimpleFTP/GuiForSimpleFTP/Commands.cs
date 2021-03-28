@@ -13,5 +13,7 @@ namespace GuiForSimpleFTP
 		public static RoutedUICommand Connect { get; } = new RoutedUICommand("Connect", "Connect", typeof(Commands));
 
 		public static RoutedUICommand StepInto { get; } = new RoutedUICommand("StepInto", "StepInto", typeof(Commands));
+
+		public static RoutedUICommand ChangeDownloadFolder { get; } = new RoutedUICommand("StepInto", "StepInto", typeof(Commands));
 	}
 }
