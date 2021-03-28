@@ -10,6 +10,7 @@ namespace SimpleFTP.Tests
     {
         private const string downloadFolderPath = "../../../Downloads";
         private const string expectedDownloadsFolderPath = "../../../ExpectedDownloads";
+        private const string emptyTestFolder = "../../../TestFolder/FolderWithoutContent";
 
         private Server server;
         private Client client;
@@ -20,6 +21,10 @@ namespace SimpleFTP.Tests
             if (!Directory.Exists(downloadFolderPath))
             {
                 Directory.CreateDirectory(downloadFolderPath);
+            }
+            if (!Directory.Exists(emptyTestFolder))
+            {
+                Directory.CreateDirectory(emptyTestFolder);
             }
         }
 
@@ -44,17 +49,9 @@ namespace SimpleFTP.Tests
 
         [Test]
         [TestCaseSource(typeof(SimpleFTPTestsTestCases), "ListTestCases")]
-        public async Task ListRequestReturnsRightSizeOfContentTest(string path, int expectedSize, List<(string, bool)> list)
+        public async Task ListRequestShouldReturnContentOfFolderInCorrectFormatTest(string path, List<(string name, bool isDirectory)> expectedContent)
         {
-            var (size, _) = await client.List(path);
-            Assert.AreEqual(expectedSize, size);
-        }
-
-        [Test]
-        [TestCaseSource(typeof(SimpleFTPTestsTestCases), "ListTestCases")]
-        public async Task ListRequestShouldReturnContentOfFolderInCorrectFormatTest(string path, int expectedSize, List<(string name, bool isDirectory)> expectedContent)
-        {
-            var (_, content) = await client.List(path);
+            var content = await client.List(path);
             if (expectedContent is null)
             {
                 Assert.IsNull(content);
@@ -78,8 +75,8 @@ namespace SimpleFTP.Tests
         {
             var fileName = Path.GetFileName(fileToDownload);
             var pathToDownloaded = await client.Get(fileToDownload, downloadFolderPath);
-            var readerExpected = new StreamReader($"{expectedDownloadsFolderPath}\\{fileName}");
-            var readerActual = new StreamReader(pathToDownloaded);
+            using var readerExpected = new StreamReader($"{expectedDownloadsFolderPath}\\{fileName}");
+            using var readerActual = new StreamReader(pathToDownloaded);
             Assert.AreEqual(readerExpected.ReadToEnd(), readerActual.ReadToEnd());
         }
 
@@ -89,22 +86,21 @@ namespace SimpleFTP.Tests
             var client1 = new Client();
             client1.Connect();
             var bigTask = client.Get("../../../bigFile.txt", downloadFolderPath);
-            var (s, _) = await client1.List("../../../TestFolder");
-            Assert.AreEqual(6, s);
+            var content = await client1.List("../../../TestFolder");
+            Assert.AreEqual(6, content.Count);
             Assert.IsFalse(bigTask.IsCompleted);
         }
 
         [Test]
         [TestCaseSource(typeof(SimpleFTPTestsTestCases), "ListTestCases")]
-        public async Task ServerWorksAfterOneOfClientClosing(string path, int expectedSize, List<(string, bool)> expectedContent)
+        public async Task ServerWorksAfterOneOfClientClosing(string path, List<(string, bool)> expectedContent)
         {
             var client1 = new Client();
             client1.Connect();
             _ = client1.Get("../../../TestFolder\\SimpleFTP.Tests.runtimeconfig.dev.json", downloadFolderPath);
             client1.Dispose();
             
-            var (size, content) = await client.List(path);
-            Assert.AreEqual(expectedSize, size);
+            var content = await client.List(path);
             if (expectedContent is null)
             {
                 Assert.IsNull(content);
@@ -114,8 +110,8 @@ namespace SimpleFTP.Tests
             
             var client2 = new Client();
             client2.Connect();
-            var (s, _) = await client2.List("../../../TestFolder");
-            Assert.AreEqual(6, s);
+            content = await client2.List("../../../TestFolder");
+            Assert.AreEqual(6, content.Count);
         }
 
         [Test]

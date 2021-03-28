@@ -52,7 +52,7 @@ namespace SimpleFTP
         /// </summary>
         /// <param name="pathToDirectory">Path to directory, which content should be listed</param>
         /// <returns>Content of specified directory according to file transport protocol</returns>
-        public async Task<(int size, IEnumerable<(string name, bool isDirectory)> directoryContent)> List(string pathToDirectory)
+        public async Task<List<(string name, bool isDirectory)>> List(string pathToDirectory)
         {
             try
             {
@@ -69,7 +69,7 @@ namespace SimpleFTP
                     ++i;
                 }
 
-                return (size, directoryContent.Count > 0 ? directoryContent : null);
+                return directoryContent.Count > 0 ? directoryContent : null;
             }
             catch (Exception e) when (e is IOException || e is SocketException || e is ObjectDisposedException)
             {

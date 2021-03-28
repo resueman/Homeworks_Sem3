@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SimpleFTP
@@ -35,8 +36,8 @@ namespace SimpleFTP
                         case "1":
                             Console.Write("Path to directory: ");
                             var pathToDirectory = Console.ReadLine();
-                            var (sizeOfDirectory, directoryContent) = await client.List(pathToDirectory);
-                            Console.WriteLine($"Number of files and directories in current directory: {sizeOfDirectory}");
+                            var directoryContent = await client.List(pathToDirectory);
+                            Console.WriteLine($"Number of files and directories in current directory: {directoryContent.Count}");
                             foreach (var (name, isDirectory) in directoryContent)
                             {
                                 Console.WriteLine($"Name: {name}, is directory: {isDirectory}");

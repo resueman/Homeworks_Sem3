@@ -12,7 +12,6 @@ namespace SimpleFTP.Tests
             new object[]
             {
                 "../../../TestFolder",
-                6,
                 new List<(string name, bool isDirectory)>
                 {
                     ("../../../TestFolder\\FolderWithoutContent", true),
@@ -26,31 +25,26 @@ namespace SimpleFTP.Tests
             new object[]
             {
                 "../../../TestFolder\\notEmpty.txt",
-                -1,
                 null
             },
             new object[]
             {
                 "../../../TestFolder\\Subfolder1",
-                1,
                 new List<(string name, bool isDirectory)> { ("../../../TestFolder\\Subfolder1\\FolderWithoutSubfolders", true) }
             },
             new object[]
             {
                 "../../../TestFolder\\FolderWithoutContent",
-                0,
                 null
             },
             new object[]
             {
                 "../../../NotExistingFolder",
-                -1,
                 null
             },
             new object[]
             {
                 "../../../TestFolder\\Subfolder1\\FolderWithoutSubfolders",
-                3,
                 new List<(string name, bool isDirectory)> 
                 {
                     ("../../../TestFolder\\Subfolder1\\FolderWithoutSubfolders\\file1.txt", false), 
