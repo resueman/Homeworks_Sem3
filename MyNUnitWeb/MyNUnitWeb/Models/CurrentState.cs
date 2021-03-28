@@ -30,7 +30,16 @@ namespace MyNUnitWeb.Models
         /// <summary>
         /// Loaded assemblies to test
         /// </summary>
-        public IEnumerable<string> Assemblies 
-            => Directory.EnumerateFiles($"{environment.WebRootPath}/Assemblies").Select(f => Path.GetFileName(f));
+        public IEnumerable<string> Assemblies
+        {
+            get
+            {
+                if (!Directory.Exists($"{environment.WebRootPath}/Assemblies/"))
+                {
+                    Directory.CreateDirectory($"{environment.WebRootPath}/Assemblies/");
+                }
+                return Directory.EnumerateFiles($"{environment.WebRootPath}/Assemblies").Select(f => Path.GetFileName(f));
+            }
+        }
     }
 }

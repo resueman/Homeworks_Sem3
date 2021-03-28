@@ -35,8 +35,8 @@ namespace MyNUnit
         {
             var isDirectory = File.GetAttributes(path).HasFlag(FileAttributes.Directory);
             if (!isDirectory)
-            {
-                return Assembly.LoadFile(path).ExportedTypes.Where(t => t.IsClass).ToList();
+            {              
+                return Assembly.Load(File.ReadAllBytes(path)).ExportedTypes.Where(t => t.IsClass).ToList();
             }
 
             var tasks = new List<Task>();
@@ -44,8 +44,10 @@ namespace MyNUnit
             var currentAssemblyName = Assembly.GetExecutingAssembly().GetName().Name;
             directoryAssemblies.RemoveAll(a => a.EndsWith(currentAssemblyName + ".dll") || a.EndsWith(currentAssemblyName + ".exe"));
             directoryAssemblies.RemoveAll(a => a == $"{path}\\Attributes.dll");
-            return directoryAssemblies
-                .Select(Assembly.LoadFrom)
+            
+            var rawAssemblies = directoryAssemblies.Select(path => File.ReadAllBytes(path));
+            return rawAssemblies
+                .Select(Assembly.Load)
                 .AsParallel()
                 .SelectMany(a => a.ExportedTypes)
                 .Where(t => t.IsClass)

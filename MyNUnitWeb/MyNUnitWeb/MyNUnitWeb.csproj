@@ -27,10 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\Assemblies\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\MyNUnit\MyNUnit.csproj" />
   </ItemGroup>
 

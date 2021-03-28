@@ -100,7 +100,6 @@ namespace MyNUnitWeb.Controllers
         {
             foreach (var assemblyName in Directory.EnumerateFiles($"{_environment.WebRootPath}/Assemblies/"))
             {
-
                 var name = Path.GetFileName(assemblyName);
                 var testedAssembly = _repository.Assemblies.Include(a => a.Tests).FirstOrDefault(a => a.Name == name);
                 if (testedAssembly == null)
