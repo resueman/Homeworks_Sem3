@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace SimpleFTP.Tests
 {
-    // Contains methods to test compliance цшер implemented file transport protocol
+    // Contains methods to test compliance with implemented file transport protocol
     public class SimpleFTPTests
     {
         private const string downloadFolderPath = "../../../Downloads";
