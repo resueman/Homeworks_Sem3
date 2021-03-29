@@ -15,7 +15,7 @@ Title="MainWindow" Height="450" Width="800" MinWidth="750" MinHeight="450">
         <CommandBinding Command="local:Commands.ChangeDownloadFolder" CanExecute="ChangeDownloadFolderCommand_CanExecute" Executed="ChangeDownloadFolderCommand_Executed" />
     </Window.CommandBindings>
 
-    <Grid>
+    <Grid Margin="7">
         <Grid.RowDefinitions>
             <RowDefinition Height="1.5*"/>
             <RowDefinition Height="4*"/>
@@ -58,7 +58,7 @@ Title="MainWindow" Height="450" Width="800" MinWidth="750" MinHeight="450">
 
             <Label Grid.Row="0" Grid.ColumnSpan="2" Content="Downloads folder" FontSize="22" HorizontalAlignment="Center"/>
             <TextBox Grid.Row="1" Grid.Column="0" IsReadOnly="True" Text="{Binding DownloadFolder}"></TextBox>
-            <Button Grid.Row="1" Grid.Column="1" Content="Изменить" FontSize="18" Command="local:Commands.ChangeDownloadFolder"></Button>
+            <Button Grid.Row="1" Grid.Column="1" Content="Изменить" FontSize="16" Command="local:Commands.ChangeDownloadFolder"></Button>
         </Grid>
 
         <ListBox x:Name="ServerContent" ItemsSource="{Binding ServerContent}" Grid.Column="0" Grid.Row="1" SelectionMode="Single">
@@ -87,13 +87,13 @@ Title="MainWindow" Height="450" Width="800" MinWidth="750" MinHeight="450">
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="{Binding Name}"/>
-                        <ProgressBar Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding ProgressValue}"/>
+                        <ProgressBar Grid.Column="1" Minimum="0" Maximum="100" Width="100" Margin="10, 0" Value="{Binding ProgressValue}"/>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <Grid Grid.Row="2" Grid.Column="1">
+        <Grid Grid.Row="2" Grid.Column="1" >
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition />
@@ -105,13 +105,13 @@ Title="MainWindow" Height="450" Width="800" MinWidth="750" MinHeight="450">
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
-            <Label Grid.Row="0" Grid.ColumnSpan="2" HorizontalContentAlignment="Center" FontSize="16">
+            <Label Grid.Row="0" Grid.ColumnSpan="2" HorizontalContentAlignment="Center" FontSize="14">
                 Server connection
             </Label>
-            <Label Grid.Row="1" Grid.Column="0" Content="Address" FontSize="16"/>
-            <Label Grid.Row="2" Grid.Column="0" Content="Port" FontSize="16"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Address}" FontSize="16"/>
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Port}" FontSize="16"/>
+            <Label Grid.Row="1" Grid.Column="0" Content="Address" FontSize="14"/>
+            <Label Grid.Row="2" Grid.Column="0" Content="Port" FontSize="14"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Address}" FontSize="14"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Port}" FontSize="14"/>
             <Button  Grid.Row="3" Grid.Column="1" Content="Connect" FontSize="18" Command="local:Commands.Connect"/>
         </Grid>
     </Grid>

@@ -5,6 +5,7 @@ environment:
       - solution_name: ParallelAndSynchronousMatrixMultiplication/ParallelAndSynchronousMatrixMultiplication.sln
       - solution_name: Lazy/Lazy.sln
       - solution_name: SimpleFTP/SimpleFTP.sln
+      - solution_name: GuiForSimpleFTP/GuiForSimpleFTP.sln
     
 before_build:
   - nuget restore %solution_name%

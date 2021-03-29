@@ -10,15 +10,24 @@ using SimpleFTP;
 
 namespace GuiForSimpleFTP
 {
+    /// <summary>
+    /// Identifies view model of client
+    /// </summary>
     public class ClientViewModel : INotifyPropertyChanged
     {
         private int port = 8888;
         private string address = "127.0.0.1";
         private Client client;
+        private string downloadFolder;
 
+        /// <summary>
+        /// Shows if client connected to server
+        /// </summary>
         public bool IsConnected { get; set; } = false;
 
-        private string downloadFolder;
+        /// <summary>
+        /// Folder on the client where files from server will be downloaded
+        /// </summary>
         public string DownloadFolder 
         {
             get => downloadFolder; 
@@ -29,10 +38,19 @@ namespace GuiForSimpleFTP
             }
         }
 
+        /// <summary>
+        /// The path to the folder the content of which we are currently viewing
+        /// </summary>
         public string CurrentExplorerPath { get; private set; } = Root;
 
+        /// <summary>
+        /// Path to root folder on server, above which it's impossible to view content
+        /// </summary>
         public static string Root { get; } = "./";
 
+        /// <summary>
+        /// Port to connect
+        /// </summary>
         public int Port
         {
             get => port;
@@ -43,6 +61,9 @@ namespace GuiForSimpleFTP
             }
         }
 
+        /// <summary>
+        /// Hostname
+        /// </summary>
         public string Address
         {
             get => address;
@@ -53,10 +74,16 @@ namespace GuiForSimpleFTP
             }
         }
 
+        /// <summary>
+        /// Downloading files
+        /// </summary>
         public ObservableCollection<Download> Downloads { get; set; }
 
         private ObservableCollection<ServerItem> serverContent;
 
+        /// <summary>
+        /// Content of currenr explored folder
+        /// </summary>
         public ObservableCollection<ServerItem> ServerContent
         {
             get => serverContent;
@@ -81,16 +108,29 @@ namespace GuiForSimpleFTP
             DownloadFolder = "./Downloads/";
         }
 
+        /// <summary>
+        /// Creates instance of ClientViewModel class with default values
+        /// </summary>
+        /// <returns>Instance of ClientViewModel class</returns>
         public static ClientViewModel BuildClientViewModelAsync()
         {
             return new ClientViewModel(8888, "127.0.0.1");
         }
 
+        /// <summary>
+        /// Creates instance of ClientViewModel class
+        /// </summary>
+        /// <param name="port">Port</param>
+        /// <param name="hostname">Hostname</param>
+        /// <returns>Instance of ClientViewModel class</returns>
         public static ClientViewModel BuildClientViewModelAsync(int port, string hostname)
         {
             return new ClientViewModel(port, hostname);
         }
 
+        /// <summary>
+        /// Connects client to port by early specified port and hostname
+        /// </summary>
         public async Task ConnectToServer()
         {
             try
@@ -105,6 +145,10 @@ namespace GuiForSimpleFTP
             }
         }
 
+        /// <summary>
+        /// Lists content of current folder on server
+        /// </summary>
+        /// <param name="path">Path of folder to list</param>
         private async Task ListServerContent(string path)
         {
             try
@@ -128,7 +172,9 @@ namespace GuiForSimpleFTP
             }
         }
 
-        // click on '<-' button
+        /// <summary>
+        /// Returns back from current folder to parent folder, but not above root folder of server
+        /// </summary>
         public async Task GoBackToParentFolder()
         {
             CurrentExplorerPath = CurrentExplorerPath != Root
@@ -138,7 +184,10 @@ namespace GuiForSimpleFTP
             await ListServerContent(CurrentExplorerPath);
         }
 
-        // double click in explorer
+        /// <summary>
+        /// Steps into selected folder
+        /// </summary>
+        /// <param name="folderName">Name of folder to step in</param>
         public async Task StepIntoFolder(string folderName)
         {
             if (ServerContent.First(item => item.Name == folderName).IsDirectory)
@@ -149,12 +198,19 @@ namespace GuiForSimpleFTP
             }
         }
 
-        // 'change' button - opens explorer
+        /// <summary>
+        /// Changes Download folder
+        /// </summary>
+        /// <param name="newDownloadPath">Path to new download folder</param>
         public void ChangeDownloadFolder(string newDownloadPath)
         {
             DownloadFolder = newDownloadPath;
         }
 
+        /// <summary>
+        /// Downloads selected file from server
+        /// </summary>
+        /// <param name="fileName">Name of file to download</param>
         public void DownloadFile(string fileName)
         {
             var download = new Download(fileName, 0);
@@ -164,10 +220,16 @@ namespace GuiForSimpleFTP
                 using var client = new Client(Address, Port);
                 client.Connect();
                 var pathToFile = Path.Combine(CurrentExplorerPath, fileName);
+                download.ProgressValue = 0;
                 await client.Get(pathToFile, DownloadFolder);
+                download.ProgressValue = 100;
+
             });
         }
 
+        /// <summary>
+        /// Downloads all files from current explored folder on server
+        /// </summary>
         public void DownloadAll()
         {
             foreach (var file in ServerContent.Where(i => !i.IsDirectory))
@@ -176,8 +238,15 @@ namespace GuiForSimpleFTP
             }
         }
 
+        /// <summary>
+        /// Property change event
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// Called when a property has changed, notifies subscribers to the property, that it has changed 
+        /// </summary>
+        /// <param name="PropertyName">Name of changed property</param>
         public void OnPropertyChanged([CallerMemberName] string PropertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
