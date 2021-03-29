@@ -19,6 +19,12 @@ namespace GuiForSimpleFTP
         private string address = "127.0.0.1";
         private Client client;
         private string downloadFolder;
+        private string errorMessage;
+
+        /// <summary>
+        /// Path to root folder on server, above which it's impossible to view content
+        /// </summary>
+        public static string Root { get; } = "./";
 
         /// <summary>
         /// Shows if client connected to server
@@ -44,11 +50,6 @@ namespace GuiForSimpleFTP
         public string CurrentExplorerPath { get; private set; } = Root;
 
         /// <summary>
-        /// Path to root folder on server, above which it's impossible to view content
-        /// </summary>
-        public static string Root { get; } = "./";
-
-        /// <summary>
         /// Port to connect
         /// </summary>
         public int Port
@@ -72,6 +73,32 @@ namespace GuiForSimpleFTP
                 address = value;
                 OnPropertyChanged(nameof(Address));
             }
+        }
+
+        /// <summary>
+        /// Error message
+        /// </summary>
+        public string ErrorMessage
+        {
+            get => errorMessage;
+            set
+            {
+                errorMessage = value;
+                OnErrorOccured();
+            }
+        }
+
+        /// <summary>
+        /// Error occured event
+        /// </summary>
+        public event PropertyChangedEventHandler ErrorOccured;
+
+        /// <summary>
+        /// Called when new error occurs
+        /// </summary>
+        public void OnErrorOccured()
+        {
+            ErrorOccured?.Invoke(this, new PropertyChangedEventArgs(ErrorMessage));
         }
 
         /// <summary>
@@ -141,7 +168,7 @@ namespace GuiForSimpleFTP
             }
             catch (Exception e)
             {
-
+                ErrorMessage = e.Message;
             }
         }
 
@@ -168,7 +195,7 @@ namespace GuiForSimpleFTP
             }
             catch (Exception e)
             {
-
+                ErrorMessage = e.Message;
             }
         }
 
@@ -177,9 +204,16 @@ namespace GuiForSimpleFTP
         /// </summary>
         public async Task GoBackToParentFolder()
         {
-            CurrentExplorerPath = CurrentExplorerPath != Root
-                ? CurrentExplorerPath.Substring(0, CurrentExplorerPath.LastIndexOf("\\"))
-                : Root;
+            try
+            {
+                CurrentExplorerPath = CurrentExplorerPath != Root
+                    ? CurrentExplorerPath.Substring(0, CurrentExplorerPath.LastIndexOf("\\"))
+                    : Root;
+            }
+            catch (Exception e)
+            {
+                ErrorMessage = e.Message;
+            }
 
             await ListServerContent(CurrentExplorerPath);
         }
@@ -190,11 +224,18 @@ namespace GuiForSimpleFTP
         /// <param name="folderName">Name of folder to step in</param>
         public async Task StepIntoFolder(string folderName)
         {
-            if (ServerContent.First(item => item.Name == folderName).IsDirectory)
+            try
             {
-                CurrentExplorerPath = CurrentExplorerPath += $"\\{folderName}";
+                if (ServerContent.First(item => item.Name == folderName).IsDirectory)
+                {
+                    CurrentExplorerPath = CurrentExplorerPath += $"\\{folderName}";
 
-                await ListServerContent(CurrentExplorerPath);
+                    await ListServerContent(CurrentExplorerPath);
+                }
+            }
+            catch (Exception e)
+            {
+                ErrorMessage = e.Message;
             }
         }
 
@@ -217,13 +258,19 @@ namespace GuiForSimpleFTP
             Downloads.Add(download);
             Task.Run(async () =>
             {
-                using var client = new Client(Address, Port);
-                client.Connect();
-                var pathToFile = Path.Combine(CurrentExplorerPath, fileName);
-                download.ProgressValue = 0;
-                await client.Get(pathToFile, DownloadFolder);
-                download.ProgressValue = 100;
-
+                try
+                {
+                    using var client = new Client(Address, Port);
+                    client.Connect();
+                    var pathToFile = Path.Combine(CurrentExplorerPath, fileName);
+                    download.ProgressValue = 0;
+                    await client.Get(pathToFile, DownloadFolder);
+                    download.ProgressValue = 100;
+                }
+                catch(Exception e)
+                {
+                    ErrorMessage = e.Message;
+                }
             });
         }
 

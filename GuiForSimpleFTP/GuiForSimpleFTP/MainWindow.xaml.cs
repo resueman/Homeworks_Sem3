@@ -14,8 +14,14 @@ namespace GuiForSimpleFTP
         public MainWindow()
         {
             var clientViewModel = ClientViewModel.BuildClientViewModelAsync();
-            DataContext = clientViewModel;
+            Initialize(clientViewModel);
             InitializeComponent();
+        }
+
+        private void Initialize(ClientViewModel clientViewModel)
+        {
+            DataContext = clientViewModel;
+            clientViewModel.ErrorOccured += (_, __) => ShowMessage();
         }
 
         // Download
@@ -68,7 +74,7 @@ namespace GuiForSimpleFTP
                 return;
             }
             viewModel = ClientViewModel.BuildClientViewModelAsync(viewModel.Port, viewModel.Address);
-            DataContext = viewModel;
+            Initialize(viewModel);
             await viewModel.ConnectToServer();
         }
 
@@ -131,6 +137,12 @@ namespace GuiForSimpleFTP
             {
                 viewModel.DownloadFolder = Path.GetDirectoryName(folderBrowser.FileName);
             }
+        }
+
+        private void ShowMessage()
+        {
+            var viewModel = DataContext as ClientViewModel;
+            MessageBox.Show(viewModel.ErrorMessage);
         }
     }
 }
