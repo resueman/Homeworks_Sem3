@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31112.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GuiForSimpleFTP", "GuiForSimpleFTP\GuiForSimpleFTP.csproj", "{96688EBE-2757-47BF-934B-2E816D78605B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "..\SimpleFTP\Client\Client.csproj", "{5EB639C7-D5CC-4F70-B71B-527517FC2442}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "..\SimpleFTP\Server\Server.csproj", "{DD2A0790-7FA5-4D3F-92DB-583A179C034C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleFTP.Tests", "..\SimpleFTP\SimpleFTP.Tests\SimpleFTP.Tests.csproj", "{0EDF4B60-8EB7-4E68-A58A-9A02EF8E27B0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{96688EBE-2757-47BF-934B-2E816D78605B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96688EBE-2757-47BF-934B-2E816D78605B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96688EBE-2757-47BF-934B-2E816D78605B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96688EBE-2757-47BF-934B-2E816D78605B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EB639C7-D5CC-4F70-B71B-527517FC2442}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EB639C7-D5CC-4F70-B71B-527517FC2442}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EB639C7-D5CC-4F70-B71B-527517FC2442}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EB639C7-D5CC-4F70-B71B-527517FC2442}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD2A0790-7FA5-4D3F-92DB-583A179C034C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD2A0790-7FA5-4D3F-92DB-583A179C034C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD2A0790-7FA5-4D3F-92DB-583A179C034C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD2A0790-7FA5-4D3F-92DB-583A179C034C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EDF4B60-8EB7-4E68-A58A-9A02EF8E27B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EDF4B60-8EB7-4E68-A58A-9A02EF8E27B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EDF4B60-8EB7-4E68-A58A-9A02EF8E27B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EDF4B60-8EB7-4E68-A58A-9A02EF8E27B0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E47162A1-0290-483F-A208-5ACBE48A72C2}
+	EndGlobalSection
+EndGlobal
