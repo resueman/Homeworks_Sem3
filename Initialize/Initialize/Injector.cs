@@ -74,7 +74,7 @@ namespace Injector
                     try
                     {
                         var parameterTypes = type.GetConstructors().First().GetParameters().Select(p => p.GetType());
-                        var args = parameterTypes.Select(t => implementations[t]);
+                        var args = parameterTypes.Select(t => implementations[t]).ToArray();
                         instance = !args.Any()
                             ? Activator.CreateInstance(type)
                             : Activator.CreateInstance(type, args);
@@ -113,7 +113,7 @@ namespace Injector
                 rootClassArguments.Add(rootClassArgument);
             }
 
-            return Activator.CreateInstance(rootType, rootClassArguments);
+            return Activator.CreateInstance(rootType, rootClassArguments.ToArray());
         }
     }
 }
