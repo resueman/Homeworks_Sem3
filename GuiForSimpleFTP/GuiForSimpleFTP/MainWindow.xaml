@@ -110,8 +110,8 @@ Title="MainWindow" Height="450" Width="800" MinWidth="750" MinHeight="450">
             </Label>
             <Label Grid.Row="1" Grid.Column="0" Content="Address" FontSize="14"/>
             <Label Grid.Row="2" Grid.Column="0" Content="Port" FontSize="14"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Address}" FontSize="14"/>
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Port}" FontSize="14"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Address, Mode=OneWay}" FontSize="14"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Port, Mode=OneWay}" FontSize="14"/>
             <Button  Grid.Row="3" Grid.Column="1" Content="Connect" FontSize="18" Command="local:Commands.Connect"/>
         </Grid>
     </Grid>

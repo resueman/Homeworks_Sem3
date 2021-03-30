@@ -29,7 +29,7 @@ namespace GuiForSimpleFTP
         /// <summary>
         /// Shows if client connected to server
         /// </summary>
-        public bool IsConnected { get; set; } = false;
+        public bool IsConnected { get; private set; } = false;
 
         /// <summary>
         /// Folder on the client where files from server will be downloaded
@@ -55,7 +55,7 @@ namespace GuiForSimpleFTP
         public int Port
         {
             get => port;
-            set
+            private set
             {
                 port = value;
                 OnPropertyChanged(nameof(Port));
@@ -68,7 +68,7 @@ namespace GuiForSimpleFTP
         public string Address
         {
             get => address;
-            set
+            private set
             {
                 address = value;
                 OnPropertyChanged(nameof(Address));
@@ -81,7 +81,7 @@ namespace GuiForSimpleFTP
         public string ErrorMessage
         {
             get => errorMessage;
-            set
+            private set
             {
                 errorMessage = value;
                 OnErrorOccured();
@@ -104,7 +104,7 @@ namespace GuiForSimpleFTP
         /// <summary>
         /// Downloading files
         /// </summary>
-        public ObservableCollection<Download> Downloads { get; set; }
+        public ObservableCollection<Download> Downloads { get; private set; }
 
         private ObservableCollection<ServerItem> serverContent;
 
@@ -114,7 +114,7 @@ namespace GuiForSimpleFTP
         public ObservableCollection<ServerItem> ServerContent
         {
             get => serverContent;
-            set
+            private set
             {
                 serverContent = value;
                 OnPropertyChanged(nameof(ServerContent));
@@ -139,10 +139,7 @@ namespace GuiForSimpleFTP
         /// Creates instance of ClientViewModel class with default values
         /// </summary>
         /// <returns>Instance of ClientViewModel class</returns>
-        public static ClientViewModel BuildClientViewModelAsync()
-        {
-            return new ClientViewModel(8888, "127.0.0.1");
-        }
+        public static ClientViewModel BuildClientViewModelAsync() => new ClientViewModel(8888, "127.0.0.1");
 
         /// <summary>
         /// Creates instance of ClientViewModel class
@@ -162,7 +159,7 @@ namespace GuiForSimpleFTP
         {
             try
             {
-                client.Connect();
+                await client.ConnectAsync();
                 IsConnected = true;
                 await ListServerContent(Root);
             }
