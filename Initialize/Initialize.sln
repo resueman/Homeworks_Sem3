@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31112.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Initialize", "Initialize\Initialize.csproj", "{E3EEEA9B-87DF-4202-8977-DA09208CE535}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InjectorTests", "InjectorTests\InjectorTests.csproj", "{2FD04320-24CF-4D57-9107-1727DB7735E2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E3EEEA9B-87DF-4202-8977-DA09208CE535}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3EEEA9B-87DF-4202-8977-DA09208CE535}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3EEEA9B-87DF-4202-8977-DA09208CE535}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3EEEA9B-87DF-4202-8977-DA09208CE535}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FD04320-24CF-4D57-9107-1727DB7735E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FD04320-24CF-4D57-9107-1727DB7735E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FD04320-24CF-4D57-9107-1727DB7735E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FD04320-24CF-4D57-9107-1727DB7735E2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7A4F8E79-FA8E-4DA2-9DA7-CB27B15E7CF3}
+	EndGlobalSection
+EndGlobal
