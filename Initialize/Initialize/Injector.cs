@@ -1,16 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Initialize
 {
+    /// <summary>
+    /// Emulates the work of the Dependency Injection container
+    /// </summary>
     class Injector
     {
-        private static Dictionary<Type, object> implementations = new Dictionary<Type, object>();
+        /// <summary>
+        /// Contains implementation for each type using in root class initialization
+        /// </summary>
+        private static readonly Dictionary<Type, object> implementations = new();
 
+        /// <summary>
+        /// Initializes root type argument if it's possible using list of available types
+        /// </summary>
+        /// <param name="rootClassParameterType">Root class parameter type</param>
+        /// <param name="availableTypes">Types available to use in root class argument initialization</param>
+        /// <returns></returns>
         private static object InitializeRootArgument(Type rootClassParameterType, IEnumerable<Type> availableTypes)
         {
             var initializationPath = new Stack<Type>();
@@ -33,7 +42,7 @@ namespace Initialize
                             marked.Add(dependency);
                             continue;
                         }
-                        throw new Exception("Dependency graph is not a tree");
+                        throw new InjectorException("Dependency graph is not a tree");
                     }
 
                     var realization = dependency.IsInterface
@@ -43,12 +52,12 @@ namespace Initialize
                     switch (realization.Count())
                     {
                         case 0:
-                            throw new Exception("No implementation");
+                            throw new InjectorException($"No implementation for {dependency}");
                         case 1:
                             implementations.Add(dependency, realization.First());
                             break;
                         default:
-                            throw new Exception("Ambigiuos");
+                            throw new InjectorException("Ambiguous of implementations");
                     }
                     continue;
                 }
@@ -61,14 +70,27 @@ namespace Initialize
                 var type = initializationPath.Pop();
                 if (!implementations.ContainsKey(type))
                 {
-                    instance = Activator.CreateInstance(type, implementations.Values);
-                    implementations.Add(type, instance);
+                    try
+                    {
+                        instance = Activator.CreateInstance(type, implementations.Values);
+                        implementations.Add(type, instance);
+                    }
+                    catch (TypeLoadException e)
+                    {
+                        throw new InjectorException($"No implementation for {type}", e);
+                    }
                 }
             }
 
             return instance;
         }
 
+        /// <summary>
+        /// Creates object of specified type
+        /// </summary>
+        /// <param name="rootClassName">Full name of class, instance of which should be created</param>
+        /// <param name="realizationsTypeNames">Full names of classes available for constructor initializations</param>
+        /// <returns>Object of specified type</returns>
         public static object Initialize(string rootClassName, string[] realizationsTypeNames)
         {
             var rootType = Type.GetType(rootClassName);
