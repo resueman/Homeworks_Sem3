@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Initialize
+namespace Injector
 {
     /// <summary>
     /// Throws when it's impossible to create instance of type
     /// </summary>
     [Serializable]
-    internal class InjectorException : Exception
+    public class InjectorException : Exception
     {
         /// <summary>
         /// Throws when it's impossible to create instance of type

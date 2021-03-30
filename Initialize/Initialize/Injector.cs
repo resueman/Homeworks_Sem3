@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Initialize
+namespace Injector
 {
     /// <summary>
     /// Emulates the work of the Dependency Injection container
     /// </summary>
-    class Injector
+    public class Injector
     {
         /// <summary>
         /// Contains implementation for each type using in root class initialization
@@ -26,11 +26,12 @@ namespace Initialize
             var marked = new List<Type>();
             var tempStack = new Stack<Type>();
             tempStack.Push(rootClassParameterType);
-            initializationPath.Push(rootClassParameterType);
             while (tempStack.Count != 0)
             {
                 var type = tempStack.Pop();
+                initializationPath.Push(type);
                 var dependencies = type.GetConstructors().First().GetParameters().Select(p => p.GetType()).ToList();
+                dependencies.AddRange(type.GetInterfaces());
                 foreach (var dependency in dependencies)
                 {
                     if (!dependency.IsInterface && !dependency.IsAbstract)
@@ -72,12 +73,20 @@ namespace Initialize
                 {
                     try
                     {
-                        instance = Activator.CreateInstance(type, implementations.Values);
+                        var parameterTypes = type.GetConstructors().First().GetParameters().Select(p => p.GetType());
+                        var args = parameterTypes.Select(t => implementations[t]);
+                        instance = !args.Any()
+                            ? Activator.CreateInstance(type)
+                            : Activator.CreateInstance(type, args);
                         implementations.Add(type, instance);
                     }
                     catch (TypeLoadException e)
                     {
                         throw new InjectorException($"No implementation for {type}", e);
+                    }
+                    catch (MissingMethodException)
+                    {
+                        throw new InjectorException($"HMMMMM");
                     }
                 }
             }
@@ -91,14 +100,15 @@ namespace Initialize
         /// <param name="rootClassName">Full name of class, instance of which should be created</param>
         /// <param name="realizationsTypeNames">Full names of classes available for constructor initializations</param>
         /// <returns>Object of specified type</returns>
-        public static object Initialize(string rootClassName, string[] realizationsTypeNames)
+        public static object Initialize(string rootClassName, IEnumerable<string> realizationsTypeNames)
         {
             var rootType = Type.GetType(rootClassName);
             var availableTypes = realizationsTypeNames.Select(Type.GetType);
-            var rootClassParameterTypes = rootType.GetConstructors()
-                .First(c => c.GetParameters().Select(p => p.GetType()).All(p => availableTypes.Contains(p)))
-                .GetParameters()
-                .Select(p => p.ParameterType);
+            var rootClassParameterTypes = rootType.GetConstructors().First().GetParameters().Select(p => p.ParameterType);
+            if (!rootClassParameterTypes.Any())
+            {
+                return Activator.CreateInstance(rootType);
+            }
 
             var rootClassArguments = new List<object>();
             foreach (var rootClassParameterType in rootClassParameterTypes)
