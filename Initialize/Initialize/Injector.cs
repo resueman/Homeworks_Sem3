@@ -84,10 +84,6 @@ namespace Injector
                     {
                         throw new InjectorException($"No implementation for {type}", e);
                     }
-                    catch (MissingMethodException)
-                    {
-                        throw new InjectorException($"HMMMMM");
-                    }
                 }
             }
 
