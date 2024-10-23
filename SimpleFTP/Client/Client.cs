@@ -47,6 +47,31 @@ namespace SimpleFTP
             }
         }
 
+        public async Task ConnectAsync()
+        {
+            var timeout = 10;
+            var maxTimeout = 100000;
+            while (timeout < maxTimeout && client == null)
+            {
+                try
+                {
+                    client = new TcpClient(hostname, port);
+                    networkStream = client.GetStream();
+                    reader = new StreamReader(networkStream);
+                    writer = new StreamWriter(networkStream) { AutoFlush = true };
+                }
+                catch (SocketException)
+                {
+                    await Task.Delay(timeout);
+                    timeout *= 2;
+                }
+            }
+            if (client == null)
+            {
+                throw new ConnectionToServerException("Server response timed out");
+            }
+        }
+
         /// <summary>
         /// Closes client
         /// </summary>
