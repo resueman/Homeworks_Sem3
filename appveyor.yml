@@ -4,8 +4,10 @@ environment:
     matrix:
       - solution_name: ParallelAndSynchronousMatrixMultiplication/ParallelAndSynchronousMatrixMultiplication.sln
       - solution_name: Lazy/Lazy.sln
+      - solution_name: MyNUnit/MyNUnit/MyNUnit.sln
       - solution_name: SimpleFTP/SimpleFTP.sln
       - solution_name: GuiForSimpleFTP/GuiForSimpleFTP.sln
+      - solution_name: MyThreadPool/MyThreadPool.sln
       - solution_name: MyNUnitWeb/MyNUnitWeb.sln
       
 before_build:
